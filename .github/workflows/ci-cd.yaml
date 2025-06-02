@@ -1,0 +1,67 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  DOCKER_REGISTRY: your-registry
+  KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Login to Docker Registry
+      uses: docker/login-action@v1
+      with:
+        registry: ${{ env.DOCKER_REGISTRY }}
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build and Push Backend
+      uses: docker/build-push-action@v2
+      with:
+        context: ./backend
+        push: true
+        tags: ${{ env.DOCKER_REGISTRY }}/backend:${{ github.sha }}
+
+    - name: Build and Push Frontend
+      uses: docker/build-push-action@v2
+      with:
+        context: ./frontend
+        push: true
+        tags: ${{ env.DOCKER_REGISTRY }}/frontend:${{ github.sha }}
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install Helm
+      uses: azure/setup-helm@v1
+      with:
+        version: v3.7.0
+
+    - name: Deploy to Kubernetes
+      run: |
+        echo "$KUBE_CONFIG" > kubeconfig.yaml
+        export KUBECONFIG=kubeconfig.yaml
+        
+        # Update Helm values
+        sed -i "s|tag: latest|tag: ${{ github.sha }}|g" k8s/helm-charts/app/values.yaml
+        
+        # Deploy using Helm
+        helm upgrade --install app ./k8s/helm-charts/app \
+          --namespace production \
+          --create-namespace \
+          --set image.tag=${{ github.sha }} 
