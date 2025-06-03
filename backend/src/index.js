@@ -141,5 +141,4 @@ if (process.env.NODE_ENV !== 'test') {
   startServer();
 }
 
-// export default app
-module.exports = app; 
+export default app; 
