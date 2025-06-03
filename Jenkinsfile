@@ -19,7 +19,10 @@ pipeline {
                             export PATH=$PATH:/opt/homebrew/bin
                             npm ci
                         '''
-                        sh 'npm run build'
+                        sh '''
+                            export PATH=$PATH:/opt/homebrew/bin
+                            npm run build
+                        '''
                     }
                     
                     // Build Backend
@@ -28,7 +31,10 @@ pipeline {
                             export PATH=$PATH:/opt/homebrew/bin
                             npm ci
                         '''
-                        sh 'npm run build'
+                        sh '''
+                            export PATH=$PATH:/opt/homebrew/bin
+                            npm run build
+                        '''
                     }
                 }
             }
