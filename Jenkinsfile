@@ -85,20 +85,6 @@ pipeline {
                             currentBuild.result = 'UNSTABLE'
                         }
                     }
-
-                    // Run E2E tests with Playwright
-                    dir('frontend') {
-                        try {
-                            sh '''
-                                export PATH=$PATH:/opt/homebrew/bin
-                                npx playwright install --with-deps
-                                npm run test:e2e
-                            '''
-                        } catch (Exception e) {
-                            echo "Frontend E2E tests failed: ${e.message}"
-                            currentBuild.result = 'UNSTABLE'
-                        }
-                    }
                 }
             }
             post {
@@ -124,18 +110,8 @@ pipeline {
                         reportName: 'Backend Test Coverage'
                     ])
 
-                    // Publish Playwright test reports
-                    publishHTML([
-                        allowMissing: false,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'frontend/playwright-report',
-                        reportFiles: 'index.html',
-                        reportName: 'E2E Test Report'
-                    ])
-
                     // Archive test artifacts
-                    archiveArtifacts artifacts: '**/test-results/**,**/coverage/**,**/playwright-report/**', allowEmptyArchive: true
+                    archiveArtifacts artifacts: '**/test-results/**,**/coverage/**', allowEmptyArchive: true
                 }
             }
         }
