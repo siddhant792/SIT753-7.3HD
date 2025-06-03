@@ -4,6 +4,7 @@ pipeline {
     environment {
         APP_NAME = 'hd-project'
         VERSION = "${BUILD_NUMBER}-${env.BUILD_TIMESTAMP}"
+        PROD_VERSION = "prod-${BUILD_NUMBER}"
         SONAR_HOST_URL = 'http://localhost:9000'
         SONAR_TOKEN = credentials('sonar-token')
         DOCKER_PATH = '/usr/local/bin:/opt/homebrew/bin'
@@ -197,6 +198,143 @@ pipeline {
                         export PATH=$PATH:/usr/local/bin:/opt/homebrew/bin
                         /usr/local/bin/docker stop frontend backend postgres || true
                         /usr/local/bin/docker rm frontend backend postgres || true
+                    '''
+                }
+            }
+        }
+
+        stage('Release') {
+            when {
+                expression { 
+                    // Only run release stage if deployment was successful
+                    return currentBuild.currentResult == 'SUCCESS'
+                }
+            }
+            steps {
+                script {
+                    try {
+                        // Tag images for production
+                        sh '''
+                            export PATH=$PATH:/usr/local/bin:/opt/homebrew/bin
+                            echo "Tagging images for production..."
+                            /usr/local/bin/docker tag ${APP_NAME}-frontend:${VERSION} ${APP_NAME}-frontend:${PROD_VERSION}
+                            /usr/local/bin/docker tag ${APP_NAME}-backend:${VERSION} ${APP_NAME}-backend:${PROD_VERSION}
+                        '''
+
+                        // Deploy to production environment
+                        sh '''
+                            export PATH=$PATH:/usr/local/bin:/opt/homebrew/bin
+                            
+                            # Create production network if it doesn't exist
+                            echo "Creating production network..."
+                            /usr/local/bin/docker network create hd-network-prod || true
+                            
+                            # Stop and remove existing production containers
+                            echo "Cleaning up existing production containers..."
+                            /usr/local/bin/docker stop frontend-prod backend-prod postgres-prod || true
+                            /usr/local/bin/docker rm frontend-prod backend-prod postgres-prod || true
+                            
+                            # Start PostgreSQL for production
+                            echo "Starting PostgreSQL for production..."
+                            /usr/local/bin/docker run -d \
+                                --name postgres-prod \
+                                --network hd-network-prod \
+                                -e POSTGRES_DB=task_management \
+                                -e POSTGRES_USER=postgres \
+                                -e POSTGRES_PASSWORD=postgres \
+                                -p 5433:5432 \
+                                postgres:14-alpine
+                            
+                            # Wait for PostgreSQL to be ready
+                            echo "Waiting for PostgreSQL to be ready..."
+                            sleep 10
+                            
+                            # Start Backend for production
+                            echo "Starting Backend for production..."
+                            /usr/local/bin/docker run -d \
+                                --name backend-prod \
+                                --network hd-network-prod \
+                                -e NODE_ENV=production \
+                                -e PORT=3002 \
+                                -e DATABASE_URL=postgres://postgres:postgres@postgres-prod:5432/task_management \
+                                -e JWT_SECRET=your-super-secret-jwt-key-here \
+                                -e JWT_EXPIRES_IN=24h \
+                                -p 3002:3002 \
+                                ${APP_NAME}-backend:${PROD_VERSION}
+                            
+                            # Wait for Backend to be ready
+                            echo "Waiting for Backend to be ready..."
+                            sleep 20
+                            
+                            # Verify backend is running
+                            if ! curl -f http://localhost:3002/health; then
+                                echo "Production Backend failed to start properly"
+                                exit 1
+                            fi
+                            
+                            # Start Frontend for production
+                            echo "Starting Frontend for production..."
+                            /usr/local/bin/docker run -d \
+                                --name frontend-prod \
+                                --network hd-network-prod \
+                                -e VITE_API_URL=http://localhost:3002 \
+                                -e VITE_WS_URL=ws://localhost:3002 \
+                                -e VITE_BASE_URL=http://localhost:3002 \
+                                -p 8082:80 \
+                                ${APP_NAME}-frontend:${PROD_VERSION}
+                            
+                            # Wait for services to be ready
+                            echo "Waiting for production services to be ready..."
+                            sleep 30
+                            
+                            # Verify production services
+                            if ! curl -f http://localhost:8082; then
+                                echo "Production Frontend service is not accessible"
+                                exit 1
+                            fi
+                            
+                            if ! curl -f http://localhost:3002/health; then
+                                echo "Production Backend service is not accessible"
+                                exit 1
+                            fi
+                            
+                            echo "Production deployment completed successfully!"
+                        '''
+                    } catch (Exception e) {
+                        echo "Production deployment failed: ${e.message}"
+                        currentBuild.result = 'FAILURE'
+                        
+                        // Rollback to previous version if available
+                        sh '''
+                            export PATH=$PATH:/usr/local/bin:/opt/homebrew/bin
+                            echo "Initiating rollback..."
+                            /usr/local/bin/docker stop frontend-prod backend-prod postgres-prod || true
+                            /usr/local/bin/docker rm frontend-prod backend-prod postgres-prod || true
+                        '''
+                        throw e
+                    }
+                }
+            }
+            post {
+                always {
+                    // Archive production deployment logs
+                    sh '''
+                        export PATH=$PATH:/usr/local/bin:/opt/homebrew/bin
+                        echo "=== Production Frontend Logs ===" > production-logs.txt
+                        /usr/local/bin/docker logs frontend-prod >> production-logs.txt
+                        echo -e "\n=== Production Backend Logs ===" >> production-logs.txt
+                        /usr/local/bin/docker logs backend-prod >> production-logs.txt
+                        echo -e "\n=== Production PostgreSQL Logs ===" >> production-logs.txt
+                        /usr/local/bin/docker logs postgres-prod >> production-logs.txt
+                    '''
+                    archiveArtifacts artifacts: 'production-logs.txt', allowEmptyArchive: true
+                }
+                failure {
+                    // Cleanup on failure
+                    sh '''
+                        export PATH=$PATH:/usr/local/bin:/opt/homebrew/bin
+                        /usr/local/bin/docker stop frontend-prod backend-prod postgres-prod || true
+                        /usr/local/bin/docker rm frontend-prod backend-prod postgres-prod || true
                     '''
                 }
             }
