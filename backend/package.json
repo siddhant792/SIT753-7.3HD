@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node src/index.js",
+    "build": "npm install && npm run lint",
     "dev": "nodemon src/index.js",
     "test:unit": "jest --coverage",
     "test:integration": "jest --config jest.integration.config.js",
