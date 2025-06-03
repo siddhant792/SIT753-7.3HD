@@ -22,6 +22,7 @@ pipeline {
                     dir('frontend') {
                         sh '''
                             export PATH=$PATH:/opt/homebrew/bin
+                            npm install
                             npm ci
                         '''
                         sh '''
