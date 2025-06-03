@@ -125,6 +125,7 @@ pipeline {
                                 -e PORT=3001 \
                                 -e DATABASE_URL=postgres://postgres:postgres@postgres:5432/task_management \
                                 -e JWT_SECRET=your-super-secret-jwt-key-here \
+                                -e JWT_EXPIRES_IN=24h \
                                 -p 3001:3001 \
                                 ${APP_NAME}-backend:${VERSION}
                             
