@@ -285,26 +285,26 @@ pipeline {
             steps {
                 script {
                     // Configure Prometheus monitoring with custom rules
-                    sh """
+                    sh '''
                         kubectl apply -f monitoring/prometheus-config.yaml
                         kubectl apply -f monitoring/grafana-dashboards.yaml
                         kubectl apply -f monitoring/alert-rules.yaml
-                    """
+                    '''
                     
                     // Set up custom dashboards
-                    sh """
+                    sh '''
                         kubectl create configmap grafana-dashboards --from-file=monitoring/grafana-dashboard.json -n monitoring
-                    """
+                    '''
                     
                     // Configure alerting rules
-                    sh """
+                    sh '''
                         kubectl apply -f monitoring/alert-rules.yaml
-                    """
+                    '''
                     
                     // Set up performance baselines
-                    sh """
+                    sh '''
                         kubectl apply -f monitoring/performance-baselines.yaml
-                    """
+                    '''
                 }
             }
         }
