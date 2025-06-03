@@ -7,6 +7,7 @@ pipeline {
         SONAR_HOST_URL = 'http://localhost:9000'
         SONAR_TOKEN = credentials('sonar-token')
         DOCKER_PATH = '/usr/local/bin:/opt/homebrew/bin'
+        NODE_VERSION = '18'
     }
 
     stages {
@@ -46,8 +47,18 @@ pipeline {
                             sh '''
                                 export PATH=$PATH:/usr/local/bin:/opt/homebrew/bin
                                 echo "Building frontend application..."
+                                
+                                # Install dependencies
                                 npm ci
+                                
+                                # Build Vue application
                                 npm run build
+                                
+                                # Verify build output
+                                if [ ! -d "dist" ]; then
+                                    echo "Build failed: dist directory not found"
+                                    exit 1
+                                fi
                             '''
                         }
                         
@@ -113,8 +124,8 @@ pipeline {
                             /usr/local/bin/docker run -d \
                                 --name frontend \
                                 --link backend \
-                                -e VUE_APP_API_URL=http://localhost:3001 \
-                                -e VUE_APP_WS_URL=ws://localhost:3001 \
+                                -e VITE_API_URL=http://localhost:3001 \
+                                -e VITE_WS_URL=ws://localhost:3001 \
                                 -p 8081:80 \
                                 ${APP_NAME}-frontend:${VERSION}
                         '''
