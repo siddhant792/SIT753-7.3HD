@@ -16,6 +16,7 @@ class WebSocketService {
       this.socket.close();
     }
 
+    // eslint-disable-next-line no-undef
     const wsUrl = `${process.env.VUE_APP_WS_URL}/ws?token=${token}`;
     this.socket = new WebSocket(wsUrl);
 
@@ -111,12 +112,13 @@ class WebSocketService {
       case 'created':
         taskStore.tasks.unshift(data);
         break;
-      case 'updated':
+      case 'updated': {
         const index = taskStore.tasks.findIndex(task => task.id === data.id);
         if (index !== -1) {
           taskStore.tasks[index] = data;
         }
         break;
+      }
       case 'deleted':
         taskStore.tasks = taskStore.tasks.filter(task => task.id !== data.id);
         break;

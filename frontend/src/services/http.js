@@ -4,6 +4,7 @@ import router from '@/router';
 
 
 const http = axios.create({
+  // eslint-disable-next-line no-undef
   baseURL: process.env.VUE_APP_API_URL,
   timeout: 10000,
   headers: {
