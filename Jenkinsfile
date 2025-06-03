@@ -1,7 +1,5 @@
 pipeline {
-    agent {
-        label 'master'
-    }
+    agent any
     
     environment {
         APP_NAME = 'hd-project'
