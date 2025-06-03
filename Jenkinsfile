@@ -207,25 +207,9 @@ pipeline {
                         try {
                             sh '''
                                 export PATH=$PATH:/opt/homebrew/bin
-                                npm audit --json > npm-audit-frontend.json
+                                echo "Running security audit for frontend..."
+                                npm audit
                             '''
-                            // Parse and analyze npm audit results
-                            def auditResults = readJSON file: 'npm-audit-frontend.json'
-                            def vulnerabilities = auditResults.vulnerabilities ?: [:]
-                            
-                            if (vulnerabilities.size() > 0) {
-                                echo "Found ${vulnerabilities.size()} vulnerabilities in frontend dependencies"
-                                vulnerabilities.each { name, vuln ->
-                                    echo """
-                                    Vulnerability: ${name}
-                                    Severity: ${vuln.severity}
-                                    Description: ${vuln.description}
-                                    Solution: ${vuln.recommendation ?: 'Update to latest version'}
-                                    """
-                                }
-                            } else {
-                                echo "No vulnerabilities found in frontend dependencies"
-                            }
                         } catch (Exception e) {
                             echo "Frontend security check failed: ${e.message}"
                             currentBuild.result = 'UNSTABLE'
@@ -236,25 +220,9 @@ pipeline {
                         try {
                             sh '''
                                 export PATH=$PATH:/opt/homebrew/bin
-                                npm audit --json > npm-audit-backend.json
+                                echo "Running security audit for backend..."
+                                npm audit
                             '''
-                            // Parse and analyze npm audit results
-                            def auditResults = readJSON file: 'npm-audit-backend.json'
-                            def vulnerabilities = auditResults.vulnerabilities ?: [:]
-                            
-                            if (vulnerabilities.size() > 0) {
-                                echo "Found ${vulnerabilities.size()} vulnerabilities in backend dependencies"
-                                vulnerabilities.each { name, vuln ->
-                                    echo """
-                                    Vulnerability: ${name}
-                                    Severity: ${vuln.severity}
-                                    Description: ${vuln.description}
-                                    Solution: ${vuln.recommendation ?: 'Update to latest version'}
-                                    """
-                                }
-                            } else {
-                                echo "No vulnerabilities found in backend dependencies"
-                            }
                         } catch (Exception e) {
                             echo "Backend security check failed: ${e.message}"
                             currentBuild.result = 'UNSTABLE'
