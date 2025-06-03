@@ -80,7 +80,7 @@ pipeline {
                         allowMissing: false,
                         alwaysLinkToLastBuild: true,
                         keepAll: true,
-                        reportDir: '**/coverage',
+                        reportDir: 'frontend/coverage',
                         reportFiles: 'index.html',
                         reportName: 'Test Coverage Report'
                     ])
