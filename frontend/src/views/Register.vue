@@ -79,7 +79,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import axios from 'axios';
+import { api } from '../services/http';
 
 const router = useRouter();
 const loading = ref(false);
@@ -105,17 +105,15 @@ const handleSubmit = async () => {
   error.value = '';
   loading.value = true;
   try {
-    await axios.post('/api/auth/register', {
+    await api.auth.register({
       name: form.value.name,
       email: form.value.email,
       password: form.value.password
     });
     showSuccessModal.value = true;
   } catch (err) {
-    if (err.response?.data?.message) {
-      error.value = err.response.data.message;
-    } else if (err.response?.data?.error) {
-      error.value = err.response.data.error;
+    if (err.message) {
+      error.value = err.message;
     } else {
       error.value = 'Registration failed. Please try again.';
     }

@@ -1,17 +1,14 @@
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
 import router from '@/router';
-import { config } from '@/config';
-
 
 const http = axios.create({
-  baseURL: config.apiUrl,
+  baseURL: 'http://localhost:3001',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
-
 
 http.interceptors.request.use(
   (config) => {
@@ -26,30 +23,24 @@ http.interceptors.request.use(
   }
 );
 
-
 http.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
-        
         const response = await http.post('/api/auth/refresh');
         const { token } = response.data;
 
-        
         localStorage.setItem('token', token);
         http.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-        
         originalRequest.headers.Authorization = `Bearer ${token}`;
         return http(originalRequest);
       } catch (refreshError) {
-        
         const authStore = useAuthStore();
         authStore.clearAuth();
         router.push('/login');
@@ -57,35 +48,27 @@ http.interceptors.response.use(
       }
     }
 
-    
     if (error.response) {
-      
-      
       const { status, data } = error.response;
 
       switch (status) {
         case 403:
-          
           router.push('/403');
           break;
         case 404:
-          
           router.push('/404');
           break;
         case 500:
-          
           router.push('/500');
           break;
       }
 
       return Promise.reject(data);
     } else if (error.request) {
-      
       return Promise.reject({
         message: 'No response from server. Please check your internet connection.',
       });
     } else {
-      
       return Promise.reject({
         message: 'An error occurred while setting up the request.',
       });
@@ -93,9 +76,7 @@ http.interceptors.response.use(
   }
 );
 
-
 export const api = {
-  
   auth: {
     login: (credentials) => http.post('/api/auth/login', credentials),
     register: (userData) => http.post('/api/auth/register', userData),
@@ -105,8 +86,6 @@ export const api = {
     updateProfile: (userData) => http.put('/api/auth/profile', userData),
     changePassword: (passwordData) => http.put('/api/auth/change-password', passwordData),
   },
-
-  
   tasks: {
     getAll: (params) => http.get('/api/tasks', { params }),
     getById: (id) => http.get(`/api/tasks/${id}`),
@@ -118,8 +97,6 @@ export const api = {
     getStats: () => http.get('/api/tasks/stats'),
     getRecent: () => http.get('/api/tasks/recent'),
   },
-
-  
   notifications: {
     getAll: () => http.get('/api/notifications'),
     markAsRead: (id) => http.put(`/api/notifications/${id}/read`),
@@ -127,8 +104,6 @@ export const api = {
     delete: (id) => http.delete(`/api/notifications/${id}`),
     deleteAll: () => http.delete('/api/notifications'),
   },
-
-  
   tenant: {
     getCurrent: () => http.get('/api/tenant/current'),
     getAll: () => http.get('/api/tenants'),

@@ -48,11 +48,10 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { useAuthStore } from '../stores/auth';
+import { api } from '../services/http';
 
 const router = useRouter();
 const route = useRoute();
-const authStore = useAuthStore();
 const loading = ref(false);
 const error = ref('');
 const form = ref({
@@ -64,13 +63,14 @@ const handleSubmit = async () => {
   loading.value = true;
   error.value = '';
   try {
-    await authStore.login(form.value.email, form.value.password);
+    const response = await api.auth.login(form.value);
+    localStorage.setItem('token', response.data.token);
     
     const redirectPath = route.query.redirect || '/dashboard';
     router.push(redirectPath);
-  } catch (error) {
-    console.error('Login failed:', error);
-    error.value = error.message || 'Failed to login. Please check your credentials and try again.';
+  } catch (err) {
+    console.error('Login failed:', err);
+    error.value = err.message || 'Failed to login. Please check your credentials and try again.';
   } finally {
     loading.value = false;
   }

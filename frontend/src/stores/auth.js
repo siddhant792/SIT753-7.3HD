@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { api } from '@/services/http';
+import axios from 'axios';
 import router from '@/router';
 
 export const useAuthStore = defineStore('auth', {
@@ -21,10 +21,15 @@ export const useAuthStore = defineStore('auth', {
       this.error = null;
 
       try {
-        const response = await api.auth.login({ email, password });
+        const response = await axios.post('/api/auth/login', {
+          email,
+          password,
+        });
+
         this.token = response.data.token;
         this.user = response.data.user;
 
+        
         if (remember) {
           localStorage.setItem('token', this.token);
           sessionStorage.removeItem('token');
@@ -32,6 +37,9 @@ export const useAuthStore = defineStore('auth', {
           sessionStorage.setItem('token', this.token);
           localStorage.removeItem('token');
         }
+
+        
+        axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`;
 
         return response.data;
       } catch (error) {
@@ -47,7 +55,7 @@ export const useAuthStore = defineStore('auth', {
       this.error = null;
 
       try {
-        const response = await api.auth.register(userData);
+        const response = await axios.post('/api/auth/register', userData);
         return response.data;
       } catch (error) {
         this.error = error.response?.data?.message || 'Registration failed';
@@ -62,7 +70,7 @@ export const useAuthStore = defineStore('auth', {
       this.error = null;
 
       try {
-        await api.auth.logout();
+        await axios.post('/api/auth/logout');
       } catch (error) {
         console.error('Logout error:', error);
       } finally {
@@ -79,7 +87,7 @@ export const useAuthStore = defineStore('auth', {
       this.error = null;
 
       try {
-        const response = await api.auth.me();
+        const response = await axios.get('/api/auth/me');
         this.user = response.data;
         return response.data;
       } catch (error) {
@@ -97,6 +105,7 @@ export const useAuthStore = defineStore('auth', {
       this.error = null;
       localStorage.removeItem('token');
       sessionStorage.removeItem('token');
+      delete axios.defaults.headers.common['Authorization'];
     },
 
     async updateProfile(userData) {
@@ -104,7 +113,7 @@ export const useAuthStore = defineStore('auth', {
       this.error = null;
 
       try {
-        const response = await api.auth.updateProfile(userData);
+        const response = await axios.put('/api/auth/profile', userData);
         this.user = response.data;
         return response.data;
       } catch (error) {
@@ -120,7 +129,7 @@ export const useAuthStore = defineStore('auth', {
       this.error = null;
 
       try {
-        const response = await api.auth.changePassword(passwordData);
+        const response = await axios.put('/api/auth/change-password', passwordData);
         return response.data;
       } catch (error) {
         this.error = error.response?.data?.message || 'Failed to change password';
