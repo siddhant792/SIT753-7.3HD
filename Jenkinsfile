@@ -204,16 +204,61 @@ pipeline {
                 script {
                     // Run npm audit for both frontend and backend
                     dir('frontend') {
-                        sh '''
-                            export PATH=$PATH:/opt/homebrew/bin
-                            npm audit --json > npm-audit-frontend.json
-                        '''
+                        try {
+                            sh '''
+                                export PATH=$PATH:/opt/homebrew/bin
+                                npm audit --json > npm-audit-frontend.json
+                            '''
+                            // Parse and analyze npm audit results
+                            def auditResults = readJSON file: 'npm-audit-frontend.json'
+                            def vulnerabilities = auditResults.vulnerabilities ?: [:]
+                            
+                            if (vulnerabilities.size() > 0) {
+                                echo "Found ${vulnerabilities.size()} vulnerabilities in frontend dependencies"
+                                vulnerabilities.each { name, vuln ->
+                                    echo """
+                                    Vulnerability: ${name}
+                                    Severity: ${vuln.severity}
+                                    Description: ${vuln.description}
+                                    Solution: ${vuln.recommendation ?: 'Update to latest version'}
+                                    """
+                                }
+                            } else {
+                                echo "No vulnerabilities found in frontend dependencies"
+                            }
+                        } catch (Exception e) {
+                            echo "Frontend security check failed: ${e.message}"
+                            currentBuild.result = 'UNSTABLE'
+                        }
                     }
+                    
                     dir('backend') {
-                        sh '''
-                            export PATH=$PATH:/opt/homebrew/bin
-                            npm audit --json > npm-audit-backend.json
-                        '''
+                        try {
+                            sh '''
+                                export PATH=$PATH:/opt/homebrew/bin
+                                npm audit --json > npm-audit-backend.json
+                            '''
+                            // Parse and analyze npm audit results
+                            def auditResults = readJSON file: 'npm-audit-backend.json'
+                            def vulnerabilities = auditResults.vulnerabilities ?: [:]
+                            
+                            if (vulnerabilities.size() > 0) {
+                                echo "Found ${vulnerabilities.size()} vulnerabilities in backend dependencies"
+                                vulnerabilities.each { name, vuln ->
+                                    echo """
+                                    Vulnerability: ${name}
+                                    Severity: ${vuln.severity}
+                                    Description: ${vuln.description}
+                                    Solution: ${vuln.recommendation ?: 'Update to latest version'}
+                                    """
+                                }
+                            } else {
+                                echo "No vulnerabilities found in backend dependencies"
+                            }
+                        } catch (Exception e) {
+                            echo "Backend security check failed: ${e.message}"
+                            currentBuild.result = 'UNSTABLE'
+                        }
                     }
                 }
             }
