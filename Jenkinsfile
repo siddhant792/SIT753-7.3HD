@@ -91,6 +91,7 @@ pipeline {
                         try {
                             sh '''
                                 export PATH=$PATH:/opt/homebrew/bin
+                                npx playwright install --with-deps
                                 npm run test:e2e
                             '''
                         } catch (Exception e) {
