@@ -41,13 +41,33 @@ pipeline {
                             /usr/local/bin/docker rm frontend backend postgres || true
                         '''
                         
-                        // Build images
+                        // Build frontend
+                        dir('frontend') {
+                            sh '''
+                                export PATH=$PATH:/usr/local/bin:/opt/homebrew/bin
+                                echo "Building frontend application..."
+                                npm ci
+                                npm run build
+                            '''
+                        }
+                        
+                        // Build backend
+                        dir('backend') {
+                            sh '''
+                                export PATH=$PATH:/usr/local/bin:/opt/homebrew/bin
+                                echo "Building backend application..."
+                                npm ci
+                                npm run build
+                            '''
+                        }
+                        
+                        // Build Docker images
                         sh '''
                             export PATH=$PATH:/usr/local/bin:/opt/homebrew/bin
-                            echo "Building frontend image..."
+                            echo "Building frontend Docker image..."
                             /usr/local/bin/docker build -t ${APP_NAME}-frontend:${VERSION} ./frontend
                             
-                            echo "Building backend image..."
+                            echo "Building backend Docker image..."
                             /usr/local/bin/docker build -t ${APP_NAME}-backend:${VERSION} ./backend
                         '''
                         
@@ -65,6 +85,10 @@ pipeline {
                                 -p 5432:5432 \
                                 postgres:14-alpine
                             
+                            # Wait for PostgreSQL to be ready
+                            echo "Waiting for PostgreSQL to be ready..."
+                            sleep 10
+                            
                             # Start Backend
                             echo "Starting Backend..."
                             /usr/local/bin/docker run -d \
@@ -79,6 +103,10 @@ pipeline {
                                 -e DB_PASSWORD=postgres \
                                 -p 3001:3001 \
                                 ${APP_NAME}-backend:${VERSION}
+                            
+                            # Wait for Backend to be ready
+                            echo "Waiting for Backend to be ready..."
+                            sleep 20
                             
                             # Start Frontend
                             echo "Starting Frontend..."
