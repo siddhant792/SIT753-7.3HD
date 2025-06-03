@@ -1,48 +1,110 @@
-apiVersion: v1
-kind: ConfigMap
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
 metadata:
-  name: prometheus-config
+  name: application-monitor
   namespace: monitoring
-data:
-  prometheus.yml: |
-    global:
-      scrape_interval: 15s
-      evaluation_interval: 15s
-
-    scrape_configs:
-      - job_name: 'kubernetes-pods'
-        kubernetes_sd_configs:
-          - role: pod
-        relabel_configs:
-          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
-            action: keep
-            regex: true
-          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
-            action: replace
-            target_label: __metrics_path__
-            regex: (.+)
-          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
-            action: replace
-            regex: ([^:]+)(?::\d+)?;(\d+)
-            replacement: $1:$2
-            target_label: __address__
-          - action: labelmap
-            regex: __meta_kubernetes_pod_label_(.+)
-          - source_labels: [__meta_kubernetes_namespace]
-            action: replace
-            target_label: kubernetes_namespace
-          - source_labels: [__meta_kubernetes_pod_name]
-            action: replace
-            target_label: kubernetes_pod_name
-
-      - job_name: 'node-exporter'
-        static_configs:
-          - targets: ['node-exporter:9100']
-
-      - job_name: 'cadvisor'
-        static_configs:
-          - targets: ['cadvisor:8080']
-
-      - job_name: 'kube-state-metrics'
-        static_configs:
-          - targets: ['kube-state-metrics:8080'] 
+spec:
+  selector:
+    matchLabels:
+      app: hd-project
+  namespaceSelector:
+    matchNames:
+      - hd-project
+  endpoints:
+  - port: metrics
+    interval: 15s
+    path: /metrics
+    scrapeTimeout: 10s
+    relabelings:
+    - sourceLabels: [__meta_kubernetes_pod_label_app]
+      targetLabel: app
+    - sourceLabels: [__meta_kubernetes_pod_label_component]
+      targetLabel: component
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: node-exporter
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: node-exporter
+  namespaceSelector:
+    matchNames:
+      - monitoring
+  endpoints:
+  - port: metrics
+    interval: 15s
+    path: /metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: kube-state-metrics
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kube-state-metrics
+  namespaceSelector:
+    matchNames:
+      - monitoring
+  endpoints:
+  - port: metrics
+    interval: 15s
+    path: /metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: postgres-exporter
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: postgres-exporter
+  namespaceSelector:
+    matchNames:
+      - hd-project
+  endpoints:
+  - port: metrics
+    interval: 15s
+    path: /metrics
+    scrapeTimeout: 10s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: prometheus-rules
+  namespace: monitoring
+spec:
+  groups:
+  - name: recording-rules
+    rules:
+    - record: job:http_requests_total:rate5m
+      expr: sum(rate(http_requests_total[5m])) by (job)
+    - record: job:http_request_duration_seconds:p95
+      expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, job))
+    - record: job:http_request_duration_seconds:p99
+      expr: histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, job))
+    - record: job:http_requests_total:errors:rate5m
+      expr: sum(rate(http_requests_total{status=~"5.."}[5m])) by (job)
+    - record: job:http_requests_total:errors:ratio
+      expr: sum(rate(http_requests_total{status=~"5.."}[5m])) by (job) / sum(rate(http_requests_total[5m])) by (job)
+    - record: container_memory_usage_bytes:ratio
+      expr: container_memory_usage_bytes / container_spec_memory_limit_bytes
+    - record: container_cpu_usage_seconds_total:rate5m
+      expr: rate(container_cpu_usage_seconds_total[5m])
+    - record: node_memory_utilization
+      expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes
+    - record: node_cpu_utilization
+      expr: 1 - avg(irate(node_cpu_seconds_total{mode="idle"}[5m])) by (instance)
+    - record: kube_deployment_status_replicas_available:ratio
+      expr: kube_deployment_status_replicas_available / kube_deployment_spec_replicas
+    - record: kube_pod_container_status_restarts_total:rate5m
+      expr: rate(kube_pod_container_status_restarts_total[5m])
+    - record: pg_stat_activity_count
+      expr: pg_stat_activity_count
+    - record: pg_stat_statements_duration_seconds:p95
+      expr: histogram_quantile(0.95, sum(rate(pg_stat_statements_duration_seconds_bucket[5m])) by (le)) 

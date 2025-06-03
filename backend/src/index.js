@@ -85,6 +85,11 @@ app.get('/metrics', async (req, res) => {
 })
 
 
+app.get('/ready', (req, res) => {
+  res.status(200).json({ status: 'ready' })
+})
+
+
 app.use(errorHandler)
 
 

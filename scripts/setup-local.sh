@@ -1,69 +1,68 @@
 #!/bin/bash
 
-# Create kind cluster
-kind create cluster --name local-cluster --config kind-config.yaml
+# Colors for output
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m'
 
-# Install NGINX Ingress Controller
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+echo -e "${GREEN}Setting up local development environment...${NC}"
 
-# Wait for ingress controller to be ready
-echo "Waiting for ingress controller to be ready..."
-kubectl wait --namespace ingress-nginx \
-  --for=condition=ready pod \
-  --selector=app.kubernetes.io/component=controller \
-  --timeout=90s
+# Check if Docker is running
+if ! docker info > /dev/null 2>&1; then
+    echo -e "${RED}Docker is not running. Please start Docker and try again.${NC}"
+    exit 1
+fi
 
-# Install cert-manager for SSL
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.12.0/cert-manager.yaml
+# Create local Kubernetes cluster using Kind
+echo -e "${GREEN}Creating local Kubernetes cluster...${NC}"
+kind create cluster --name hd-project --config kind-config.yaml
 
-# Wait for cert-manager to be ready
-echo "Waiting for cert-manager to be ready..."
-kubectl wait --namespace cert-manager \
-  --for=condition=ready pod \
-  --selector=app.kubernetes.io/instance=cert-manager \
-  --timeout=90s
+# Build and load Docker images
+echo -e "${GREEN}Building and loading Docker images...${NC}"
+docker build -t hd-project-frontend:latest ./frontend
+docker build -t hd-project-backend:latest ./backend
 
-# Create cluster issuer for local development
-kubectl apply -f - <<EOF
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
-metadata:
-  name: selfsigned-issuer
-spec:
-  selfSigned: {}
-EOF
+kind load docker-image hd-project-frontend:latest --name hd-project
+kind load docker-image hd-project-backend:latest --name hd-project
 
-# Create namespace for our application
-kubectl create namespace production
+# Create monitoring namespace
+echo -e "${GREEN}Creating monitoring namespace...${NC}"
+kubectl create namespace monitoring
 
-# Create secret for database credentials
-kubectl create secret generic db-credentials \
-  --namespace production \
-  --from-literal=url='postgresql://postgres:postgres@postgres:5432/mydb'
+# Install Prometheus Operator CRDs
+echo -e "${GREEN}Installing Prometheus Operator CRDs...${NC}"
+kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml
 
-# Create secret for Grafana admin credentials
-kubectl create secret generic grafana-admin-credentials \
-  --namespace production \
-  --from-literal=admin-user=admin \
-  --from-literal=admin-password=admin
+# Apply Kubernetes configurations
+echo -e "${GREEN}Applying Kubernetes configurations...${NC}"
+kubectl apply -f k8s/base/namespace.yaml
+kubectl apply -f k8s/base/configmap.yaml
+kubectl apply -f k8s/base/secret.yaml
+kubectl apply -f k8s/base/backend-deployment.yaml
+kubectl apply -f k8s/base/frontend-deployment.yaml
+kubectl apply -f k8s/base/backend-service.yaml
+kubectl apply -f k8s/base/frontend-service.yaml
 
-# Add Helm repos
-helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-helm repo add grafana https://grafana.github.io/helm-charts
-helm repo update
+# Apply monitoring configurations
+echo -e "${GREEN}Setting up monitoring...${NC}"
+kubectl apply -f monitoring/prometheus-config.yaml
+kubectl apply -f monitoring/grafana-dashboards.yaml
+kubectl apply -f monitoring/alert-rules.yaml
 
-# Install Prometheus
-helm install prometheus prometheus-community/kube-prometheus-stack \
-  --namespace production \
-  -f monitoring/prometheus-values.yaml
+# Wait for pods to be ready
+echo -e "${GREEN}Waiting for pods to be ready...${NC}"
+kubectl wait --for=condition=ready pod -l app=backend --timeout=300s -n hd-project
+kubectl wait --for=condition=ready pod -l app=frontend --timeout=300s -n hd-project
 
-# Install Grafana
-helm install grafana grafana/grafana \
-  --namespace production \
-  -f monitoring/grafana-values.yaml
+# Port forward services
+echo -e "${GREEN}Setting up port forwarding...${NC}"
+kubectl port-forward svc/frontend 3000:80 -n hd-project &
+kubectl port-forward svc/backend 8080:8080 -n hd-project &
+kubectl port-forward svc/prometheus-server 9090:9090 -n monitoring &
+kubectl port-forward svc/grafana 3001:3000 -n monitoring &
 
-# Update hosts file for local domain
-echo "127.0.0.1 local-app.com" | sudo tee -a /etc/hosts
-
-echo "Local setup completed! You can now deploy your application using:"
-echo "helm install app ./k8s/helm-charts/app --namespace production" 
+echo -e "${GREEN}Local development environment is ready!${NC}"
+echo -e "Frontend: http://localhost:3000"
+echo -e "Backend: http://localhost:8080"
+echo -e "Prometheus: http://localhost:9090"
+echo -e "Grafana: http://localhost:3001" 

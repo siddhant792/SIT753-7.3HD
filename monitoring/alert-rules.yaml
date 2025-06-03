@@ -1,53 +1,98 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: application-alerts
+  name: alert-rules
   namespace: monitoring
 spec:
   groups:
   - name: application
     rules:
     - alert: HighErrorRate
-      expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
+      expr: api_error_rate > 5
       for: 5m
       labels:
         severity: critical
       annotations:
         summary: High error rate detected
-        description: "Error rate is above 5% for the last 5 minutes"
+        description: "Error rate is {{ $value }}% for the last 5 minutes"
 
     - alert: HighLatency
-      expr: rate(http_request_duration_seconds_sum[5m]) / rate(http_request_duration_seconds_count[5m]) > 1
+      expr: http_request_duration_seconds:p95 > 1
       for: 5m
       labels:
         severity: warning
       annotations:
         summary: High latency detected
-        description: "Average response time is above 1 second for the last 5 minutes"
-
-    - alert: HighCPUUsage
-      expr: sum(rate(container_cpu_usage_seconds_total{container!=""}[5m])) by (pod) > 0.8
-      for: 5m
-      labels:
-        severity: warning
-      annotations:
-        summary: High CPU usage detected
-        description: "CPU usage is above 80% for the last 5 minutes"
+        description: "95th percentile latency is {{ $value }}s for the last 5 minutes"
 
     - alert: HighMemoryUsage
-      expr: sum(container_memory_usage_bytes{container!=""}) by (pod) / sum(container_spec_memory_limit_bytes{container!=""}) by (pod) > 0.8
+      expr: container_memory_utilization > 85
       for: 5m
       labels:
         severity: warning
       annotations:
-        summary: High memory usage detected
-        description: "Memory usage is above 80% for the last 5 minutes"
+        summary: High memory usage
+        description: "Container memory usage is {{ $value }}% for the last 5 minutes"
 
-    - alert: PodRestarting
-      expr: increase(kube_pod_container_status_restarts_total[5m]) > 0
+    - alert: HighCPUUsage
+      expr: container_cpu_utilization > 80
       for: 5m
       labels:
         severity: warning
       annotations:
-        summary: Pod is restarting
-        description: "Pod has restarted in the last 5 minutes" 
+        summary: High CPU usage
+        description: "Container CPU usage is {{ $value }}% for the last 5 minutes"
+
+    - alert: DatabaseConnectionsHigh
+      expr: database_connections > 80
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: High number of database connections
+        description: "Database connections are at {{ $value }} for the last 5 minutes"
+
+    - alert: SlowDatabaseQueries
+      expr: database_query_duration > 1
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: Slow database queries detected
+        description: "95th percentile query duration is {{ $value }}s for the last 5 minutes"
+
+    - alert: PodCrashLooping
+      expr: kube_pod_container_status_restarts_total > 5
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: Pod is crash looping
+        description: "Pod {{ $labels.pod }} has restarted {{ $value }} times in the last 5 minutes"
+
+    - alert: DeploymentNotReady
+      expr: kube_deployment_status_replicas_available / kube_deployment_spec_replicas < 0.8
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: Deployment not ready
+        description: "Deployment {{ $labels.deployment }} has less than 80% of replicas available"
+
+    - alert: NodeMemoryPressure
+      expr: node_memory_utilization > 90
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: Node memory pressure
+        description: "Node {{ $labels.node }} memory usage is {{ $value }}% for the last 5 minutes"
+
+    - alert: NodeCPUPressure
+      expr: node_cpu_utilization > 90
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: Node CPU pressure
+        description: "Node {{ $labels.node }} CPU usage is {{ $value }}% for the last 5 minutes" 
