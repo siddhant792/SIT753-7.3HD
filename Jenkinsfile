@@ -94,7 +94,10 @@ pipeline {
 
                     // Run frontend coverage tests
                     dir('frontend') {
-                        sh 'npm run test:coverage'
+                        sh '''
+                            export PATH=$PATH:/opt/homebrew/bin
+                            npm run test:coverage
+                        '''
                     }
                 }
             }
