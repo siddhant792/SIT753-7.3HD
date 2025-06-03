@@ -1,4 +1,4 @@
-const Joi = require('joi');
+import Joi from 'joi'
 
 const taskSchema = Joi.object({
   title: Joi.string().required().min(3).max(100),
@@ -19,7 +19,7 @@ const commentSchema = Joi.object({
   attachments: Joi.array().items(Joi.string()).max(5)
 }).required();
 
-module.exports = {
+export {
   taskSchema,
   commentSchema
 }; 

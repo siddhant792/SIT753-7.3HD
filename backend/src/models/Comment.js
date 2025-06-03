@@ -1,5 +1,5 @@
-const { Model, DataTypes } = require('sequelize')
-const { sequelize } = require('../config/database')
+import { Model, DataTypes } from 'sequelize'
+import { sequelize } from '../config/database.js'
 
 class Comment extends Model {}
 
@@ -83,4 +83,4 @@ Comment.init({
   ]
 })
 
-module.exports = Comment 
+export default Comment 

@@ -1,5 +1,5 @@
-const { Model, DataTypes } = require('sequelize')
-const { sequelize } = require('../config/database')
+import { Model, DataTypes } from 'sequelize'
+import { sequelize } from '../config/database.js'
 
 class Tenant extends Model {}
 
@@ -37,7 +37,7 @@ Tenant.init({
     defaultValue: {
       status: 'active',
       startDate: new Date(),
-      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) 
+      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
     }
   },
   billing: {
@@ -70,4 +70,4 @@ Tenant.init({
   ]
 })
 
-module.exports = Tenant 
+export default Tenant 

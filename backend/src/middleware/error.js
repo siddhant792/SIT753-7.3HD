@@ -1,9 +1,15 @@
-const logger = require('../utils/logger')
-const { ValidationError, NotFoundError, UnauthorizedError } = require('../utils/errors')
+import logger from '../utils/logger.js'
+import { ValidationError, NotFoundError, UnauthorizedError } from '../utils/errors.js'
 
 const errorHandler = (err, req, res, next) => {
   logger.error(err)
 
+  // If headers are already sent, delegate to Express's default error handler
+  if (res.headersSent) {
+    return next(err)
+  }
+
+  // Handle specific error types
   if (err instanceof ValidationError) {
     return res.status(400).json({
       status: 'error',
@@ -26,7 +32,7 @@ const errorHandler = (err, req, res, next) => {
     })
   }
 
-  
+  // Handle Sequelize errors
   if (err.name === 'SequelizeValidationError') {
     return res.status(400).json({
       status: 'error',
@@ -38,7 +44,6 @@ const errorHandler = (err, req, res, next) => {
     })
   }
 
-  
   if (err.name === 'SequelizeUniqueConstraintError') {
     return res.status(400).json({
       status: 'error',
@@ -50,7 +55,7 @@ const errorHandler = (err, req, res, next) => {
     })
   }
 
-  
+  // Handle JWT errors
   if (err.name === 'JsonWebTokenError') {
     return res.status(401).json({
       status: 'error',
@@ -65,11 +70,11 @@ const errorHandler = (err, req, res, next) => {
     })
   }
 
-  
-  res.status(500).json({
+  // Handle all other errors
+  return res.status(500).json({
     status: 'error',
     message: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message
   })
 }
 
-module.exports = errorHandler 
+export default errorHandler 

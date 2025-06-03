@@ -1,4 +1,4 @@
-const Joi = require('joi');
+import Joi from 'joi'
 
 const tenantSchema = Joi.object({
   name: Joi.string().required().min(2).max(50),
@@ -12,7 +12,7 @@ const tenantSchema = Joi.object({
       logo: Joi.string().uri().allow(null)
     }).default()
   }).default()
-}).required();
+}).required()
 
 const settingsSchema = Joi.object({
   settings: Joi.object({
@@ -23,7 +23,7 @@ const settingsSchema = Joi.object({
       logo: Joi.string().uri().allow(null)
     })
   }).required()
-}).required();
+}).required()
 
 const subscriptionSchema = Joi.object({
   plan: Joi.string().valid('free', 'pro', 'enterprise').required(),
@@ -39,10 +39,10 @@ const subscriptionSchema = Joi.object({
       postalCode: Joi.string().required()
     }).required()
   }).required()
-}).required();
+}).required()
 
-module.exports = {
+export {
   tenantSchema,
   settingsSchema,
   subscriptionSchema
-}; 
+} 

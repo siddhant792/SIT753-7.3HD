@@ -1,5 +1,5 @@
-const { Model, DataTypes } = require('sequelize')
-const { sequelize } = require('../config/database')
+import { Model, DataTypes } from 'sequelize'
+import { sequelize } from '../config/database.js'
 
 class Task extends Model {}
 
@@ -104,4 +104,4 @@ Task.init({
   ]
 })
 
-module.exports = Task 
+export default Task 

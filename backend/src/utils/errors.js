@@ -46,7 +46,7 @@ class DatabaseError extends AppError {
   }
 }
 
-module.exports = {
+export {
   AppError,
   ValidationError,
   UnauthorizedError,

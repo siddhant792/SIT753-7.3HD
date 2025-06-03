@@ -1,7 +1,7 @@
-const jwt = require('jsonwebtoken');
-const { User, Tenant } = require('../models');
-const { ValidationError, UnauthorizedError } = require('../utils/errors');
-const emailService = require('../services/email');
+import jwt from 'jsonwebtoken';
+import { User, Tenant } from '../models/index.js';
+import { ValidationError, UnauthorizedError } from '../utils/errors.js';
+import emailService from '../services/email.js';
 
 const generateToken = (user) => {
   return jwt.sign(
@@ -121,10 +121,12 @@ const login = async (req, res, next) => {
   }
 };
 
-const logout = async (req, res) => {
-  
-  
-  res.status(200).json({ message: 'Logged out successfully' });
+const logout = async (req, res, next) => {
+  try {
+    res.status(200).json({ message: 'Logged out successfully' });
+  } catch (error) {
+    next(error);
+  }
 };
 
 const getCurrentUser = async (req, res, next) => {
@@ -143,7 +145,7 @@ const getCurrentUser = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export {
   register,
   login,
   logout,

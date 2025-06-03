@@ -1,22 +1,20 @@
-const { Tenant, User } = require('../models');
-const { NotFoundError, ValidationError } = require('../utils/errors');
-const emailService = require('../services/email');
+import { Tenant, User } from '../models/index.js'
+import { NotFoundError, ValidationError } from '../utils/errors.js'
+import emailService from '../services/email.js'
 
 const createTenant = async (req, res, next) => {
   try {
-    const { name, plan, settings, customDomain } = req.body;
+    const { name, plan, settings, customDomain } = req.body
 
-    
-    const existingTenant = await Tenant.findOne({ where: { name } });
+    const existingTenant = await Tenant.findOne({ where: { name } })
     if (existingTenant) {
-      throw new ValidationError('Tenant name already exists');
+      throw new ValidationError('Tenant name already exists')
     }
 
-    
     if (customDomain) {
-      const existingDomain = await Tenant.findOne({ where: { customDomain } });
+      const existingDomain = await Tenant.findOne({ where: { customDomain } })
       if (existingDomain) {
-        throw new ValidationError('Custom domain already in use');
+        throw new ValidationError('Custom domain already in use')
       }
     }
 
@@ -28,15 +26,15 @@ const createTenant = async (req, res, next) => {
       subscription: {
         status: 'active',
         startDate: new Date(),
-        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) 
+        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
       }
-    });
+    })
 
-    res.status(201).json(tenant);
+    res.status(201).json(tenant)
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 const getTenants = async (req, res, next) => {
   try {
@@ -47,17 +45,17 @@ const getTenants = async (req, res, next) => {
           attributes: ['id', 'name', 'email', 'role']
         }
       ]
-    });
+    })
 
-    res.json(tenants);
+    res.json(tenants)
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 const getTenant = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params
 
     const tenant = await Tenant.findByPk(id, {
       include: [
@@ -66,110 +64,104 @@ const getTenant = async (req, res, next) => {
           attributes: ['id', 'name', 'email', 'role']
         }
       ]
-    });
+    })
 
     if (!tenant) {
-      throw new NotFoundError('Tenant not found');
+      throw new NotFoundError('Tenant not found')
     }
 
-    res.json(tenant);
+    res.json(tenant)
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 const updateTenant = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const updates = req.body;
+    const { id } = req.params
+    const updates = req.body
 
-    const tenant = await Tenant.findByPk(id);
+    const tenant = await Tenant.findByPk(id)
     if (!tenant) {
-      throw new NotFoundError('Tenant not found');
+      throw new NotFoundError('Tenant not found')
     }
 
-    
     if (updates.name && updates.name !== tenant.name) {
-      const existingTenant = await Tenant.findOne({ where: { name: updates.name } });
+      const existingTenant = await Tenant.findOne({ where: { name: updates.name } })
       if (existingTenant) {
-        throw new ValidationError('Tenant name already exists');
+        throw new ValidationError('Tenant name already exists')
       }
     }
 
-    
     if (updates.customDomain && updates.customDomain !== tenant.customDomain) {
-      const existingDomain = await Tenant.findOne({ where: { customDomain: updates.customDomain } });
+      const existingDomain = await Tenant.findOne({ where: { customDomain: updates.customDomain } })
       if (existingDomain) {
-        throw new ValidationError('Custom domain already in use');
+        throw new ValidationError('Custom domain already in use')
       }
     }
 
-    await tenant.update(updates);
+    await tenant.update(updates)
 
-    res.json(tenant);
+    res.json(tenant)
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 const deleteTenant = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params
 
-    const tenant = await Tenant.findByPk(id);
+    const tenant = await Tenant.findByPk(id)
     if (!tenant) {
-      throw new NotFoundError('Tenant not found');
+      throw new NotFoundError('Tenant not found')
     }
 
-    
-    const users = await User.findAll({ where: { tenantId: id } });
+    const users = await User.findAll({ where: { tenantId: id } })
 
-    
-    await tenant.destroy();
+    await tenant.destroy()
 
-    
     for (const user of users) {
-      await emailService.sendTenantDeletionEmail(user);
+      await emailService.sendTenantDeletionEmail(user)
     }
 
-    res.status(204).send();
+    res.status(204).send()
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 const updateTenantSettings = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const { settings } = req.body;
+    const { id } = req.params
+    const { settings } = req.body
 
-    const tenant = await Tenant.findByPk(id);
+    const tenant = await Tenant.findByPk(id)
     if (!tenant) {
-      throw new NotFoundError('Tenant not found');
+      throw new NotFoundError('Tenant not found')
     }
 
-    
     const updatedSettings = {
       ...tenant.settings,
       ...settings
-    };
+    }
 
-    await tenant.update({ settings: updatedSettings });
+    await tenant.update({ settings: updatedSettings })
 
-    res.json(tenant);
+    res.json(tenant)
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 const updateSubscription = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const { plan, billing } = req.body;
+    const { id } = req.params
+    const { plan, billing } = req.body
 
-    const tenant = await Tenant.findByPk(id);
+    const tenant = await Tenant.findByPk(id)
     if (!tenant) {
-      throw new NotFoundError('Tenant not found');
+      throw new NotFoundError('Tenant not found')
     }
 
     const subscription = {
@@ -177,31 +169,30 @@ const updateSubscription = async (req, res, next) => {
       plan,
       status: 'active',
       startDate: new Date(),
-      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) 
-    };
+      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+    }
 
     await tenant.update({
       plan,
       subscription,
       billing
-    });
+    })
 
-    
     const admin = await User.findOne({
       where: { tenantId: id, role: 'admin' }
-    });
+    })
 
     if (admin) {
-      await emailService.sendSubscriptionUpdateEmail(admin, plan);
+      await emailService.sendSubscriptionUpdateEmail(admin, plan)
     }
 
-    res.json(tenant);
+    res.json(tenant)
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
-module.exports = {
+export {
   createTenant,
   getTenants,
   getTenant,
@@ -209,4 +200,4 @@ module.exports = {
   deleteTenant,
   updateTenantSettings,
   updateSubscription
-}; 
+} 

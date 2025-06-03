@@ -1,10 +1,13 @@
-const multer = require('multer')
-const path = require('path')
-const fs = require('fs').promises
-const { v4: uuidv4 } = require('uuid')
-const { ValidationError } = require('../utils/errors')
-const logger = require('../utils/logger')
+import multer from 'multer'
+import path from 'path'
+import { promises as fs } from 'fs'
+import { v4 as uuidv4 } from 'uuid'
+import { ValidationError } from '../utils/errors.js'
+import logger from '../utils/logger.js'
+import { fileURLToPath } from 'url'
 
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 const storage = multer.diskStorage({
   destination: async (req, file, cb) => {
@@ -22,9 +25,7 @@ const storage = multer.diskStorage({
   }
 })
 
-
 const fileFilter = (req, file, cb) => {
-  
   const allowedTypes = [
     'image/jpeg',
     'image/png',
@@ -43,16 +44,14 @@ const fileFilter = (req, file, cb) => {
   }
 }
 
-
 const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024, 
-    files: 5 
+    fileSize: 5 * 1024 * 1024,
+    files: 5
   }
 })
-
 
 const handleMulterError = (err, req, res, next) => {
   if (err instanceof multer.MulterError) {
@@ -67,7 +66,6 @@ const handleMulterError = (err, req, res, next) => {
   next(err)
 }
 
-
 const deleteFile = async (filename) => {
   try {
     const filepath = path.join(__dirname, '../../uploads', filename)
@@ -79,12 +77,11 @@ const deleteFile = async (filename) => {
   }
 }
 
-
 const getFileUrl = (filename) => {
   return `${process.env.API_URL}/uploads/${filename}`
 }
 
-module.exports = {
+export {
   upload,
   handleMulterError,
   deleteFile,

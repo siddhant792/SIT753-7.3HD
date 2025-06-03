@@ -1,5 +1,5 @@
-const nodemailer = require('nodemailer')
-const logger = require('../utils/logger')
+import nodemailer from 'nodemailer'
+import logger from '../utils/logger.js'
 
 class EmailService {
   constructor() {
@@ -112,4 +112,5 @@ class EmailService {
   }
 }
 
-module.exports = new EmailService() 
+const emailService = new EmailService()
+export default emailService 

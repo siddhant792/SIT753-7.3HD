@@ -1,5 +1,5 @@
-const Joi = require('joi')
-const { ValidationError } = require('../utils/errors')
+import Joi from 'joi'
+import { ValidationError } from '../utils/errors.js'
 
 const validateRequest = (schema) => {
   return (req, res, next) => {
@@ -14,13 +14,12 @@ const validateRequest = (schema) => {
         message: detail.message
       }))
 
-      throw new ValidationError('Validation failed', errors)
+      return next(new ValidationError('Validation failed', errors))
     }
 
     next()
   }
 }
-
 
 const schemas = {
   login: Joi.object({
@@ -31,8 +30,10 @@ const schemas = {
   register: Joi.object({
     name: Joi.string().min(2).max(50).required(),
     email: Joi.string().email().required(),
-    password: Joi.string().min(8).required(),
-    tenantName: Joi.string().min(2).max(50).required()
+    password: Joi.string().min(8).pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/).required(),
+    tenantId: Joi.string().uuid().optional(),
+    tenantName: Joi.string().min(2).max(50).optional(),
+    role: Joi.string().valid('user', 'admin').default('user')
   }),
 
   task: Joi.object({
@@ -68,7 +69,7 @@ const schemas = {
   })
 }
 
-module.exports = {
+export {
   validateRequest,
   schemas
 } 

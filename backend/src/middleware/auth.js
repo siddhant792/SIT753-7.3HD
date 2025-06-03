@@ -1,5 +1,5 @@
-const jwt = require('jsonwebtoken')
-const { UnauthorizedError, ForbiddenError } = require('../utils/errors')
+import jwt from 'jsonwebtoken'
+import { UnauthorizedError, ForbiddenError } from '../utils/errors.js'
 
 const authenticate = (req, res, next) => {
   try {
@@ -50,7 +50,7 @@ const requireTenant = (req, res, next) => {
   next()
 }
 
-module.exports = {
+export {
   authenticate,
   authorize,
   requireTenant

@@ -1,11 +1,9 @@
-module.exports = {
-  preset: 'ts-jest',
+export default {
   testEnvironment: 'node',
-  transform: {
-    '^.+\\.ts$': 'ts-jest'
-  },
-  testMatch: ['**/*.integration.test.ts'],
-  moduleFileExtensions: ['ts', 'js'],
+  testMatch: ['**/*.integration.test.js'],
+  moduleFileExtensions: ['js'],
+  transform: {},
+  extensionsToTreatAsEsm: ['.js'],
   reporters: [
     'default',
     ['jest-junit', { outputDirectory: 'test-results', outputName: 'junit.xml' }]

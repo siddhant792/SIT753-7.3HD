@@ -1,7 +1,20 @@
-const { Sequelize } = require('sequelize')
-const logger = require('../utils/logger')
+import { Sequelize } from 'sequelize'
+import logger from '../utils/logger.js'
+import dotenv from 'dotenv'
 
-const sequelize = new Sequelize(process.env.DATABASE_URL, {
+// Ensure environment variables are loaded
+dotenv.config()
+
+// Debug: Log the DATABASE_URL (with password masked)
+const dbUrl = process.env.DATABASE_URL
+if (!dbUrl) {
+  logger.error('DATABASE_URL is not defined in environment variables')
+  throw new Error('DATABASE_URL is not defined in environment variables')
+}
+
+logger.info('Database URL format:', dbUrl.replace(/:[^:@]+@/, ':****@'))
+
+const sequelize = new Sequelize(dbUrl, {
   dialect: 'postgres',
   logging: (msg) => logger.debug(msg),
   pool: {
@@ -32,7 +45,7 @@ const syncDatabase = async () => {
   }
 }
 
-module.exports = {
+export {
   sequelize,
   testConnection,
   syncDatabase
