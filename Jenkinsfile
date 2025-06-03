@@ -237,6 +237,79 @@ pipeline {
                 }
             }
         }
+
+        stage('Docker Test') {
+            steps {
+                script {
+                    try {
+                        sh '''
+                            echo "Testing Docker access..."
+                            docker --version
+                            docker-compose --version
+                            docker ps
+                            echo "Docker access verified successfully!"
+                        '''
+                    } catch (Exception e) {
+                        echo "Docker access test failed: ${e.message}"
+                        currentBuild.result = 'FAILURE'
+                        throw e
+                    }
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
+                    try {
+                        // Stop any existing containers
+                        sh 'docker-compose down --remove-orphans || true'
+                        
+                        // Build and start containers
+                        sh '''
+                            export PATH=$PATH:/opt/homebrew/bin
+                            docker-compose build --no-cache
+                            docker-compose up -d
+                        '''
+                        
+                        // Wait for services to be ready
+                        sh '''
+                            echo "Waiting for services to be ready..."
+                            sleep 30
+                            
+                            # Check if frontend is accessible
+                            if ! curl -f http://localhost:8081; then
+                                echo "Frontend service is not accessible"
+                                exit 1
+                            fi
+                            
+                            # Check if backend is accessible
+                            if ! curl -f http://localhost:3001/health; then
+                                echo "Backend service is not accessible"
+                                exit 1
+                            fi
+                            
+                            echo "All services are up and running!"
+                        '''
+                    } catch (Exception e) {
+                        echo "Deployment failed: ${e.message}"
+                        currentBuild.result = 'FAILURE'
+                        throw e
+                    }
+                }
+            }
+            post {
+                always {
+                    // Archive deployment logs
+                    sh 'docker-compose logs > deployment-logs.txt'
+                    archiveArtifacts artifacts: 'deployment-logs.txt', allowEmptyArchive: true
+                }
+                failure {
+                    // Cleanup on failure
+                    sh 'docker-compose down --remove-orphans || true'
+                }
+            }
+        }
     }
 
     post {
