@@ -1,11 +1,11 @@
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
 import router from '@/router';
+import { config } from '@/config';
 
 
 const http = axios.create({
-  // eslint-disable-next-line no-undef
-  baseURL: process.env.VUE_APP_API_URL,
+  baseURL: config.apiUrl,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
