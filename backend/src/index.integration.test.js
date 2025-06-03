@@ -1,5 +1,5 @@
 import request from 'supertest'
-import app from './index'
+const app = require('./index')
 
 describe('Integration Tests', () => {
   test('should respond to health check', async () => {

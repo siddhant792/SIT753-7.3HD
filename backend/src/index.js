@@ -17,8 +17,7 @@ import tenantRoutes from './routes/tenants.js'
 
 dotenv.config()
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
+const __dirname = process.cwd();
 
 const app = express()
 
@@ -137,4 +136,10 @@ process.on('uncaughtException', (error) => {
   process.exit(1)
 })
 
-startServer() 
+// startServer()
+if (process.env.NODE_ENV !== 'test') {
+  startServer();
+}
+
+// export default app
+module.exports = app; 

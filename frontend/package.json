@@ -11,13 +11,15 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "vue": "^3.4.15",
-    "vue-router": "^4.2.5",
+    "axios": "^1.6.7",
     "pinia": "^2.1.7",
-    "axios": "^1.6.7"
+    "vue": "^3.4.15",
+    "vue-router": "^4.2.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.52.0",
     "@vitejs/plugin-vue": "^5.0.3",
+    "@vitest/coverage-v8": "^1.6.1",
     "@vue/eslint-config-prettier": "^8.0.0",
     "@vue/test-utils": "^2.4.4",
     "eslint": "^8.56.0",

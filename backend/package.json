@@ -7,13 +7,13 @@
     "start": "node src/index.js",
     "build": "npm install && npm run lint",
     "dev": "nodemon src/index.js",
-    "test:unit": "jest --coverage",
-    "test:integration": "jest --config jest.integration.config.js",
-    "test:coverage": "jest --coverage --coverageReporters='text-summary' --coverageReporters='html'",
+    "test:unit": "jest --config jest.config.cjs --coverage",
+    "test:integration": "jest --config jest.integration.config.cjs",
+    "test:coverage": "jest --config jest.config.cjs --coverage --coverageReporters='text-summary' --coverageReporters='html'",
     "lint": "eslint . --ext .js",
-    "test:api": "jest --config jest.api.config.js",
-    "test:api:watch": "jest --config jest.api.config.js --watch",
-    "test:api:coverage": "jest --config jest.api.config.js --coverage"
+    "test:api": "jest --config jest.api.config.cjs",
+    "test:api:watch": "jest --config jest.api.config.cjs --watch",
+    "test:api:coverage": "jest --config jest.api.config.cjs --coverage"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
@@ -39,6 +39,9 @@
     "ws": "^8.16.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.27.4",
+    "@babel/preset-env": "^7.27.2",
+    "babel-jest": "^30.0.0-beta.3",
     "eslint": "^8.56.0",
     "jest": "^29.7.0",
     "jest-junit": "^16.0.0",
