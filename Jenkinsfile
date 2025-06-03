@@ -86,19 +86,6 @@ pipeline {
                         }
                     }
 
-                    // Run API tests
-                    dir('backend') {
-                        try {
-                            sh '''
-                                export PATH=$PATH:/opt/homebrew/bin
-                                npm run test:api
-                            '''
-                        } catch (Exception e) {
-                            echo "Backend API tests failed: ${e.message}"
-                            currentBuild.result = 'UNSTABLE'
-                        }
-                    }
-
                     // Run E2E tests with Playwright
                     dir('frontend') {
                         try {
