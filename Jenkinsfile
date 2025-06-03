@@ -18,6 +18,9 @@ pipeline {
                         sh '''
                             export PATH=$PATH:/usr/local/bin:/opt/homebrew/bin
                             
+                            # Clean up existing containers if they exist
+                            /usr/local/bin/docker rm -f prometheus grafana || true
+                            
                             # Create monitoring network if it doesn't exist
                             /usr/local/bin/docker network create monitoring || true
                             
