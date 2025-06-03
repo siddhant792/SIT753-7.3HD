@@ -31,6 +31,26 @@ pipeline {
             }
         }
 
+        stage('Test Backend') {
+            steps {
+                dir('backend') {
+                    sh '''
+                        echo "Installing backend dependencies..."
+                        npm ci
+                        
+                        echo "Running backend unit tests..."
+                        npm run test:unit
+                        
+                        echo "Running backend integration tests..."
+                        npm run test:integration
+                        
+                        echo "Running backend API tests..."
+                        npm run test:api
+                    '''
+                }
+            }
+        }
+
         stage('Deploy') {
             steps {
                 script {
@@ -78,8 +98,15 @@ pipeline {
                             sh '''
                                 export PATH=$PATH:/usr/local/bin:/opt/homebrew/bin
                                 echo "Building backend application..."
+                                
+                                # Clean install dependencies
                                 npm ci
-                                npm run build
+                                
+                                # Run linting
+                                npm run lint
+                                
+                                # Create version file
+                                echo "Version: ${VERSION}" > version.txt
                             '''
                         }
                         
@@ -123,6 +150,11 @@ pipeline {
                                 -e DB_NAME=task_management \
                                 -e DB_USER=postgres \
                                 -e DB_PASSWORD=postgres \
+                                -e JWT_SECRET=your_jwt_secret \
+                                -e SMTP_HOST=smtp.example.com \
+                                -e SMTP_PORT=587 \
+                                -e SMTP_USER=your_smtp_user \
+                                -e SMTP_PASS=your_smtp_password \
                                 -p 3001:3001 \
                                 ${APP_NAME}-backend:${VERSION}
                             
