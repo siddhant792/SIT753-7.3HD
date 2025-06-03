@@ -3,7 +3,7 @@ pipeline {
     
     environment {
         APP_NAME = 'hd-project'
-        VERSION = "${BUILD_NUMBER}-${env.BUILD_TIMESTAMP}"
+        VERSION = "${BUILD_NUMBER}"
         SONAR_HOST_URL = 'http://localhost:9000'
         SONAR_TOKEN = credentials('sonar-token')
         DOCKER_PATH = '/usr/local/bin:/opt/homebrew/bin'
@@ -337,26 +337,46 @@ pipeline {
                             
                             # Start Backend
                             echo "Starting Backend..."
-                            /usr/local/bin/docker run -d \
-                                --name backend \
-                                --network hd-network \
-                                -e NODE_ENV=development \
-                                -e PORT=3001 \
-                                -e DATABASE_URL=postgres://postgres:postgres@postgres:5432/task_management \
-                                -e JWT_SECRET=your-super-secret-jwt-key-here \
-                                -e JWT_EXPIRES_IN=24h \
-                                -p 3001:3001 \
-                                ${APP_NAME}-backend:${VERSION}
-                            
-                            # Wait for Backend to be ready
-                            echo "Waiting for Backend to be ready..."
-                            sleep 20
-                            
-                            # Verify backend is running
-                            if ! curl -f http://localhost:3001/health; then
-                                echo "Backend failed to start properly"
-                                exit 1
-                            fi
+                            sh '''
+                                export PATH=$PATH:/usr/local/bin:/opt/homebrew/bin
+                                /usr/local/bin/docker run -d \
+                                    --name backend \
+                                    --network hd-network \
+                                    -e NODE_ENV=development \
+                                    -e PORT=3001 \
+                                    -e DATABASE_URL=postgres://postgres:postgres@postgres:5432/task_management \
+                                    -e JWT_SECRET=your-super-secret-jwt-key-here \
+                                    -e JWT_EXPIRES_IN=24h \
+                                    -p 3001:3001 \
+                                    ${APP_NAME}-backend:${VERSION}
+                                
+                                # Wait for Backend to be ready
+                                echo "Waiting for Backend to be ready..."
+                                sleep 30
+                                
+                                # Check backend logs
+                                echo "Backend container logs:"
+                                /usr/local/bin/docker logs backend
+                                
+                                # Verify backend is running
+                                echo "Checking backend health endpoint..."
+                                for i in {1..5}; do
+                                    if curl -f http://localhost:3001/health; then
+                                        echo "Backend is healthy!"
+                                        break
+                                    fi
+                                    echo "Attempt $i: Backend not ready yet, waiting..."
+                                    sleep 10
+                                done
+                                
+                                # Final health check
+                                if ! curl -f http://localhost:3001/health; then
+                                    echo "Backend failed to start properly after all attempts"
+                                    echo "Container logs:"
+                                    /usr/local/bin/docker logs backend
+                                    exit 1
+                                fi
+                            '''
                             
                             # Start Frontend
                             echo "Starting Frontend..."
