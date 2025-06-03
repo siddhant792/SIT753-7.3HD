@@ -9,6 +9,7 @@ pipeline {
     }
 
     stages {
+        /* Commenting out all stages except Docker Test
         stage('Build') {
             steps {
                 script {
@@ -237,6 +238,7 @@ pipeline {
                 }
             }
         }
+        */
 
         stage('Docker Test') {
             steps {
@@ -244,9 +246,10 @@ pipeline {
                     try {
                         sh '''
                             echo "Testing Docker access..."
-                            docker --version
-                            docker-compose --version
-                            docker ps
+                            export PATH=$PATH:/usr/local/bin:/opt/homebrew/bin
+                            /usr/local/bin/docker --version || /opt/homebrew/bin/docker --version
+                            /usr/local/bin/docker-compose --version || /opt/homebrew/bin/docker-compose --version
+                            /usr/local/bin/docker ps || /opt/homebrew/bin/docker ps
                             echo "Docker access verified successfully!"
                         '''
                     } catch (Exception e) {
@@ -258,6 +261,7 @@ pipeline {
             }
         }
 
+        /* Commenting out Deploy stage
         stage('Deploy') {
             steps {
                 script {
@@ -310,6 +314,7 @@ pipeline {
                 }
             }
         }
+        */
     }
 
     post {
