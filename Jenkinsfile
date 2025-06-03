@@ -15,13 +15,19 @@ pipeline {
                     
                     // Build Frontend
                     dir('frontend') {
-                        sh 'npm ci'
+                        sh '''
+                            export PATH=$PATH:/opt/homebrew/bin
+                            npm ci
+                        '''
                         sh 'npm run build'
                     }
                     
                     // Build Backend
                     dir('backend') {
-                        sh 'npm ci'
+                        sh '''
+                            export PATH=$PATH:/opt/homebrew/bin
+                            npm ci
+                        '''
                         sh 'npm run build'
                     }
                 }
