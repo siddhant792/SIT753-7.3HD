@@ -245,7 +245,7 @@ pipeline {
             post {
                 always {
                     // Archive security reports
-                    archiveArtifacts artifacts: '**/npm-audit-*.json', allowEmptyArchive: true
+                    archiveArtifacts artifacts: '**/npm-audit-*.json,**/package-lock.json', allowEmptyArchive: true
                 }
             }
         }
