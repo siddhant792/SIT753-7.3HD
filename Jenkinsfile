@@ -118,11 +118,7 @@ pipeline {
                                 --link postgres \
                                 -e NODE_ENV=development \
                                 -e PORT=3001 \
-                                -e DB_HOST=postgres \
-                                -e DB_PORT=5432 \
-                                -e DB_NAME=task_management \
-                                -e DB_USER=postgres \
-                                -e DB_PASSWORD=postgres \
+                                -e DATABASE_URL=postgres://postgres:postgres@postgres:5432/task_management \
                                 -p 3001:3001 \
                                 ${APP_NAME}-backend:${VERSION}
                             
@@ -130,11 +126,17 @@ pipeline {
                             echo "Waiting for Backend to be ready..."
                             sleep 20
                             
+                            # Verify backend is running
+                            if ! curl -f http://localhost:3001/health; then
+                                echo "Backend failed to start properly"
+                                exit 1
+                            fi
+                            
                             # Start Frontend
                             echo "Starting Frontend..."
                             /usr/local/bin/docker run -d \
                                 --name frontend \
-                                --link backend \
+                                --network container:backend \
                                 -e VITE_API_URL=http://localhost:3001 \
                                 -e VITE_WS_URL=ws://localhost:3001 \
                                 -e VITE_BASE_URL=http://localhost:3001 \
