@@ -53,6 +53,14 @@ pipeline {
                                 rm -rf node_modules package-lock.json
                                 npm install
                                 
+                                # Fix vulnerabilities
+                                echo "Fixing npm vulnerabilities..."
+                                npm audit fix --force || true
+                                
+                                # Update npm
+                                echo "Updating npm..."
+                                npm install -g npm@latest
+                                
                                 # Build Vue application
                                 echo "Building Vue application..."
                                 npm run build
@@ -79,7 +87,7 @@ pipeline {
                         sh '''
                             export PATH=$PATH:/usr/local/bin:/opt/homebrew/bin
                             echo "Building frontend Docker image..."
-                            /usr/local/bin/docker build -t ${APP_NAME}-frontend:${VERSION} ./frontend
+                            /usr/local/bin/docker build --no-cache -t ${APP_NAME}-frontend:${VERSION} ./frontend
                             
                             echo "Building backend Docker image..."
                             /usr/local/bin/docker build -t ${APP_NAME}-backend:${VERSION} ./backend

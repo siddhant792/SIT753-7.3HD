@@ -1,5 +1,5 @@
 # Build stage
-FROM node:16-alpine as build
+FROM node:18-alpine as build
 
 # Create app directory
 WORKDIR /usr/src/app
@@ -10,6 +10,11 @@ RUN npm install
 
 # Copy app source
 COPY . .
+
+# Set environment variables for Vite
+ENV NODE_ENV=production
+ENV VITE_API_URL=http://localhost:3001
+ENV VITE_WS_URL=ws://localhost:3001
 
 # Build the application
 RUN npm run build
