@@ -129,7 +129,7 @@ pipeline {
                         allowMissing: false,
                         alwaysLinkToLastBuild: true,
                         keepAll: true,
-                        reportDir: '**/coverage',
+                        reportDir: 'backend/coverage',
                         reportFiles: 'index.html',
                         reportName: 'Code Coverage Report'
                     ])
