@@ -16,7 +16,7 @@ pipeline {
             steps {
                 script {
                     // Version tagging
-                    sh "echo ${VERSION} > version.txt"
+                    sh "echo \${VERSION} > version.txt"
                     
                     // Build Frontend with caching
                     dir('frontend') {
@@ -32,14 +32,14 @@ pipeline {
                     
                     // Multi-stage Docker builds with caching
                     sh """
-                        docker build --cache-from ${DOCKER_REGISTRY}/${APP_NAME}-frontend:latest \
-                            -t ${DOCKER_REGISTRY}/${APP_NAME}-frontend:${VERSION} \
-                            -t ${DOCKER_REGISTRY}/${APP_NAME}-frontend:latest \
+                        docker build --cache-from \${DOCKER_REGISTRY}/\${APP_NAME}-frontend:latest \
+                            -t \${DOCKER_REGISTRY}/\${APP_NAME}-frontend:\${VERSION} \
+                            -t \${DOCKER_REGISTRY}/\${APP_NAME}-frontend:latest \
                             -f frontend/Dockerfile frontend/
                         
-                        docker build --cache-from ${DOCKER_REGISTRY}/${APP_NAME}-backend:latest \
-                            -t ${DOCKER_REGISTRY}/${APP_NAME}-backend:${VERSION} \
-                            -t ${DOCKER_REGISTRY}/${APP_NAME}-backend:latest \
+                        docker build --cache-from \${DOCKER_REGISTRY}/\${APP_NAME}-backend:latest \
+                            -t \${DOCKER_REGISTRY}/\${APP_NAME}-backend:\${VERSION} \
+                            -t \${DOCKER_REGISTRY}/\${APP_NAME}-backend:latest \
                             -f backend/Dockerfile backend/
                     """
                 }
@@ -49,11 +49,11 @@ pipeline {
                     archiveArtifacts artifacts: '**/dist/**,version.txt', fingerprint: true
                     // Push images to registry
                     sh """
-                        echo ${DOCKER_CREDENTIALS} | docker login -u ${DOCKER_CREDENTIALS_USR} --password-stdin ${DOCKER_REGISTRY}
-                        docker push ${DOCKER_REGISTRY}/${APP_NAME}-frontend:${VERSION}
-                        docker push ${DOCKER_REGISTRY}/${APP_NAME}-frontend:latest
-                        docker push ${DOCKER_REGISTRY}/${APP_NAME}-backend:${VERSION}
-                        docker push ${DOCKER_REGISTRY}/${APP_NAME}-backend:latest
+                        echo \${DOCKER_CREDENTIALS} | docker login -u \${DOCKER_CREDENTIALS_USR} --password-stdin \${DOCKER_REGISTRY}
+                        docker push \${DOCKER_REGISTRY}/\${APP_NAME}-frontend:\${VERSION}
+                        docker push \${DOCKER_REGISTRY}/\${APP_NAME}-frontend:latest
+                        docker push \${DOCKER_REGISTRY}/\${APP_NAME}-backend:\${VERSION}
+                        docker push \${DOCKER_REGISTRY}/\${APP_NAME}-backend:latest
                     """
                 }
             }
@@ -166,8 +166,8 @@ pipeline {
                     steps {
                         script {
                             sh """
-                                trivy image --format json --output trivy-frontend.json ${DOCKER_REGISTRY}/${APP_NAME}-frontend:${VERSION}
-                                trivy image --format json --output trivy-backend.json ${DOCKER_REGISTRY}/${APP_NAME}-backend:${VERSION}
+                                trivy image --format json --output trivy-frontend.json \${DOCKER_REGISTRY}/\${APP_NAME}-frontend:\${VERSION}
+                                trivy image --format json --output trivy-backend.json \${DOCKER_REGISTRY}/\${APP_NAME}-backend:\${VERSION}
                             """
                         }
                     }
@@ -208,11 +208,11 @@ pipeline {
                     // Deploy to Kubernetes staging environment with health checks
                     sh """
                         kubectl config use-context staging
-                        helm upgrade --install ${APP_NAME} ./k8s \
-                            --set image.tag=${VERSION} \
+                        helm upgrade --install \${APP_NAME} ./k8s \
+                            --set image.tag=\${VERSION} \
                             --set environment=staging \
                             --set ingress.enabled=true \
-                            --set ingress.host=staging.${APP_NAME}.com \
+                            --set ingress.host=staging.\${APP_NAME}.com \
                             --set resources.requests.cpu=100m \
                             --set resources.requests.memory=128Mi \
                             --set resources.limits.cpu=500m \
@@ -224,11 +224,11 @@ pipeline {
                     
                     // Wait for deployment to be ready
                     sh """
-                        kubectl rollout status deployment/${APP_NAME} -n staging --timeout=300s
+                        kubectl rollout status deployment/\${APP_NAME} -n staging --timeout=300s
                     """
                     
                     // Run smoke tests
-                    sh 'npm run test:smoke -- --baseUrl=http://staging.${APP_NAME}.com'
+                    sh 'npm run test:smoke -- --baseUrl=http://staging.\${APP_NAME}.com'
                 }
             }
         }
@@ -246,18 +246,18 @@ pipeline {
                     
                     // Tag the release with semantic versioning
                     sh """
-                        git tag -a "v${VERSION}" -m "Release version ${VERSION}"
-                        git push origin "v${VERSION}"
+                        git tag -a "v\${VERSION}" -m "Release version \${VERSION}"
+                        git push origin "v\${VERSION}"
                     """
                     
                     // Deploy to production with blue/green deployment
                     sh """
                         kubectl config use-context production
-                        helm upgrade --install ${APP_NAME} ./k8s \
-                            --set image.tag=${VERSION} \
+                        helm upgrade --install \${APP_NAME} ./k8s \
+                            --set image.tag=\${VERSION} \
                             --set environment=production \
                             --set ingress.enabled=true \
-                            --set ingress.host=${APP_NAME}.com \
+                            --set ingress.host=\${APP_NAME}.com \
                             --set resources.requests.cpu=200m \
                             --set resources.requests.memory=256Mi \
                             --set resources.limits.cpu=1000m \
@@ -272,11 +272,11 @@ pipeline {
                     
                     // Wait for deployment to be ready
                     sh """
-                        kubectl rollout status deployment/${APP_NAME} -n production --timeout=300s
+                        kubectl rollout status deployment/\${APP_NAME} -n production --timeout=300s
                     """
                     
                     // Verify deployment
-                    sh 'npm run test:smoke -- --baseUrl=http://${APP_NAME}.com'
+                    sh 'npm run test:smoke -- --baseUrl=http://\${APP_NAME}.com'
                 }
             }
         }
@@ -320,26 +320,26 @@ pipeline {
         }
         success {
             slackSend(
-                channel: "${SLACK_CHANNEL}",
+                channel: "\${SLACK_CHANNEL}",
                 color: 'good',
                 message: """
-                    Pipeline succeeded: ${env.JOB_NAME} #${env.BUILD_NUMBER}
-                    Version: ${VERSION}
-                    Changes: ${env.CHANGE_TITLE ?: 'No changes'}
-                    Build URL: ${env.BUILD_URL}
+                    Pipeline succeeded: \${env.JOB_NAME} #\${env.BUILD_NUMBER}
+                    Version: \${VERSION}
+                    Changes: \${env.CHANGE_TITLE ?: 'No changes'}
+                    Build URL: \${env.BUILD_URL}
                 """
             )
         }
         failure {
             slackSend(
-                channel: "${SLACK_CHANNEL}",
+                channel: "\${SLACK_CHANNEL}",
                 color: 'danger',
                 message: """
-                    Pipeline failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}
-                    Version: ${VERSION}
-                    Changes: ${env.CHANGE_TITLE ?: 'No changes'}
-                    Build URL: ${env.BUILD_URL}
-                    Error: ${currentBuild.description}
+                    Pipeline failed: \${env.JOB_NAME} #\${env.BUILD_NUMBER}
+                    Version: \${VERSION}
+                    Changes: \${env.CHANGE_TITLE ?: 'No changes'}
+                    Build URL: \${env.BUILD_URL}
+                    Error: \${currentBuild.description}
                 """
             )
         }
