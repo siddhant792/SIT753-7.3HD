@@ -6,6 +6,7 @@ pipeline {
         VERSION = "${BUILD_NUMBER}-${env.BUILD_TIMESTAMP}"
         SONAR_HOST_URL = 'http://localhost:9000'
         SONAR_TOKEN = credentials('sonar-token')
+        DOCKER_PATH = '/usr/local/bin:/opt/homebrew/bin'
     }
 
     stages {
@@ -17,8 +18,7 @@ pipeline {
                             echo "Testing Docker access..."
                             export PATH=$PATH:/usr/local/bin:/opt/homebrew/bin
                             /usr/local/bin/docker --version || /opt/homebrew/bin/docker --version
-                            /usr/local/bin/docker-compose --version || /opt/homebrew/bin/docker-compose --version
-                            /usr/local/bin/docker ps || /opt/homebrew/bin/docker ps
+                            /usr/local/bin/docker ps
                             echo "Docker access verified successfully!"
                         '''
                     } catch (Exception e) {
@@ -34,14 +34,61 @@ pipeline {
             steps {
                 script {
                     try {
-                        // Stop any existing containers
-                        sh 'docker-compose down --remove-orphans || true'
-                        
-                        // Build and start containers
+                        // Stop and remove existing containers
                         sh '''
-                            export PATH=$PATH:/opt/homebrew/bin
-                            docker-compose build --no-cache
-                            docker-compose up -d
+                            export PATH=$PATH:/usr/local/bin:/opt/homebrew/bin
+                            /usr/local/bin/docker stop frontend backend postgres || true
+                            /usr/local/bin/docker rm frontend backend postgres || true
+                        '''
+                        
+                        // Build images
+                        sh '''
+                            export PATH=$PATH:/usr/local/bin:/opt/homebrew/bin
+                            echo "Building frontend image..."
+                            /usr/local/bin/docker build -t ${APP_NAME}-frontend:${VERSION} ./frontend
+                            
+                            echo "Building backend image..."
+                            /usr/local/bin/docker build -t ${APP_NAME}-backend:${VERSION} ./backend
+                        '''
+                        
+                        // Start containers
+                        sh '''
+                            export PATH=$PATH:/usr/local/bin:/opt/homebrew/bin
+                            
+                            # Start PostgreSQL
+                            echo "Starting PostgreSQL..."
+                            /usr/local/bin/docker run -d \
+                                --name postgres \
+                                -e POSTGRES_DB=task_management \
+                                -e POSTGRES_USER=postgres \
+                                -e POSTGRES_PASSWORD=postgres \
+                                -p 5432:5432 \
+                                postgres:14-alpine
+                            
+                            # Start Backend
+                            echo "Starting Backend..."
+                            /usr/local/bin/docker run -d \
+                                --name backend \
+                                --link postgres \
+                                -e NODE_ENV=development \
+                                -e PORT=3001 \
+                                -e DB_HOST=postgres \
+                                -e DB_PORT=5432 \
+                                -e DB_NAME=task_management \
+                                -e DB_USER=postgres \
+                                -e DB_PASSWORD=postgres \
+                                -p 3001:3001 \
+                                ${APP_NAME}-backend:${VERSION}
+                            
+                            # Start Frontend
+                            echo "Starting Frontend..."
+                            /usr/local/bin/docker run -d \
+                                --name frontend \
+                                --link backend \
+                                -e VUE_APP_API_URL=http://localhost:3001 \
+                                -e VUE_APP_WS_URL=ws://localhost:3001 \
+                                -p 8081:80 \
+                                ${APP_NAME}-frontend:${VERSION}
                         '''
                         
                         // Wait for services to be ready
@@ -73,12 +120,24 @@ pipeline {
             post {
                 always {
                     // Archive deployment logs
-                    sh 'docker-compose logs > deployment-logs.txt'
+                    sh '''
+                        export PATH=$PATH:/usr/local/bin:/opt/homebrew/bin
+                        echo "=== Frontend Logs ===" > deployment-logs.txt
+                        /usr/local/bin/docker logs frontend >> deployment-logs.txt
+                        echo -e "\n=== Backend Logs ===" >> deployment-logs.txt
+                        /usr/local/bin/docker logs backend >> deployment-logs.txt
+                        echo -e "\n=== PostgreSQL Logs ===" >> deployment-logs.txt
+                        /usr/local/bin/docker logs postgres >> deployment-logs.txt
+                    '''
                     archiveArtifacts artifacts: 'deployment-logs.txt', allowEmptyArchive: true
                 }
                 failure {
                     // Cleanup on failure
-                    sh 'docker-compose down --remove-orphans || true'
+                    sh '''
+                        export PATH=$PATH:/usr/local/bin:/opt/homebrew/bin
+                        /usr/local/bin/docker stop frontend backend postgres || true
+                        /usr/local/bin/docker rm frontend backend postgres || true
+                    '''
                 }
             }
         }
