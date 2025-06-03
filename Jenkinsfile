@@ -4,6 +4,8 @@ pipeline {
     environment {
         APP_NAME = 'hd-project'
         VERSION = "${BUILD_NUMBER}-${env.BUILD_TIMESTAMP}"
+        SONAR_HOST_URL = 'http://localhost:9000'
+        SONAR_TOKEN = credentials('sonar-token')
     }
 
     stages {
@@ -146,6 +148,38 @@ pipeline {
                         sh '''
                             export PATH=$PATH:/opt/homebrew/bin
                             npm run test:coverage
+                        '''
+                    }
+
+                    // Run SonarQube analysis
+                    withSonarQubeEnv('SonarQube') {
+                        sh '''
+                            export PATH=$PATH:/opt/homebrew/bin
+                            # Analyze frontend
+                            cd frontend
+                            sonar-scanner \
+                                -Dsonar.projectKey=${APP_NAME}-frontend \
+                                -Dsonar.sources=src \
+                                -Dsonar.tests=src \
+                                -Dsonar.test.inclusions=**/*.test.tsx,**/*.test.ts \
+                                -Dsonar.typescript.lcov.reportPaths=coverage/lcov.info \
+                                -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+                                -Dsonar.coverage.exclusions=**/*.test.tsx,**/*.test.ts \
+                                -Dsonar.host.url=${SONAR_HOST_URL} \
+                                -Dsonar.login=${SONAR_TOKEN}
+
+                            # Analyze backend
+                            cd ../backend
+                            sonar-scanner \
+                                -Dsonar.projectKey=${APP_NAME}-backend \
+                                -Dsonar.sources=src \
+                                -Dsonar.tests=src \
+                                -Dsonar.test.inclusions=**/*.test.ts \
+                                -Dsonar.typescript.lcov.reportPaths=coverage/lcov.info \
+                                -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+                                -Dsonar.coverage.exclusions=**/*.test.ts \
+                                -Dsonar.host.url=${SONAR_HOST_URL} \
+                                -Dsonar.login=${SONAR_TOKEN}
                         '''
                     }
                 }
