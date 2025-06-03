@@ -25,12 +25,12 @@ pipeline {
                             /usr/local/bin/docker volume create prometheus-config
                             /usr/local/bin/docker volume create grafana-storage
                             
-                            # Create a temporary container to copy config files
-                            /usr/local/bin/docker run --rm -v prometheus-config:/config prom/prometheus sh -c "mkdir -p /config && touch /config/prometheus.yml /config/alert.rules"
+                            # Create initial configuration files using a temporary container
+                            /usr/local/bin/docker run --rm -v prometheus-config:/config alpine sh -c "mkdir -p /config && touch /config/prometheus.yml /config/alert.rules"
                             
                             # Copy configuration files to the volume
-                            cat prometheus.yml | /usr/local/bin/docker run --rm -i -v prometheus-config:/config prom/prometheus sh -c "cat > /config/prometheus.yml"
-                            cat alert.rules | /usr/local/bin/docker run --rm -i -v prometheus-config:/config prom/prometheus sh -c "cat > /config/alert.rules"
+                            cat prometheus.yml | /usr/local/bin/docker run --rm -i -v prometheus-config:/config alpine sh -c "cat > /config/prometheus.yml"
+                            cat alert.rules | /usr/local/bin/docker run --rm -i -v prometheus-config:/config alpine sh -c "cat > /config/alert.rules"
                             
                             # Start Prometheus
                             echo "Starting Prometheus..."
