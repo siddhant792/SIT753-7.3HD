@@ -5,5 +5,9 @@ module.exports = {
     '^.+\\.ts$': 'ts-jest'
   },
   testMatch: ['**/*.integration.test.ts'],
-  moduleFileExtensions: ['ts', 'js']
+  moduleFileExtensions: ['ts', 'js'],
+  reporters: [
+    'default',
+    ['jest-junit', { outputDirectory: 'test-results', outputName: 'junit.xml' }]
+  ]
 }; 
