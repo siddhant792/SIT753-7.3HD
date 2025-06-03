@@ -5,36 +5,47 @@
       <button
         v-if="notifications.length > 0"
         class="btn btn-text"
-        @click="markAllAsRead"
         :disabled="loading"
+        @click="markAllAsRead"
       >
         Mark all as read
       </button>
     </div>
 
-    <div v-if="loading" class="loading">
+    <div
+      v-if="loading"
+      class="loading"
+    >
       Loading notifications...
     </div>
 
-    <div v-else-if="notifications.length === 0" class="empty-state">
+    <div
+      v-else-if="notifications.length === 0"
+      class="empty-state"
+    >
       No notifications
     </div>
 
-    <div v-else class="notifications">
+    <div
+      v-else
+      class="notifications"
+    >
       <div
         v-for="notification in notifications"
         :key="notification.id"
         :class="['notification', { unread: !notification.read }]"
       >
         <div class="notification-content">
-          <p class="message">{{ notification.message }}</p>
+          <p class="message">
+            {{ notification.message }}
+          </p>
           <span class="time">{{ formatTime(notification.createdAt) }}</span>
         </div>
         <button
           v-if="!notification.read"
           class="btn btn-text"
-          @click="markAsRead(notification.id)"
           :disabled="loading"
+          @click="markAsRead(notification.id)"
         >
           Mark as read
         </button>
@@ -44,15 +55,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import axios from 'axios';
-
-const props = defineProps({
-  notifications: {
-    type: Array,
-    required: true
-  }
-});
 
 const emit = defineEmits(['refresh']);
 const loading = ref(false);

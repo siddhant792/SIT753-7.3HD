@@ -6,29 +6,21 @@
   },
   "extends": [
     "eslint:recommended",
-    "plugin:react/recommended",
+    "plugin:vue/vue3-recommended",
     "plugin:@typescript-eslint/recommended"
   ],
-  "parser": "@typescript-eslint/parser",
+  "parser": "vue-eslint-parser",
   "parserOptions": {
-    "ecmaFeatures": {
-      "jsx": true
-    },
     "ecmaVersion": 12,
-    "sourceType": "module"
+    "sourceType": "module",
+    "parser": "@typescript-eslint/parser"
   },
   "plugins": [
-    "react",
+    "vue",
     "@typescript-eslint"
   ],
   "rules": {
-    "react/react-in-jsx-scope": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off"
-  },
-  "settings": {
-    "react": {
-      "version": "detect"
-    }
   },
   "ignorePatterns": ["dist/**/*", "build/**/*", "node_modules/**/*"],
   "overrides": [

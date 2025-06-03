@@ -4,34 +4,56 @@
     <div class="filters">
       <div class="search-box">
         <input
-          type="text"
           v-model="filters.search"
+          type="text"
           placeholder="Search tasks..."
           class="form-control"
-        />
+        >
       </div>
 
       <div class="filter-group">
-        <select v-model="filters.status" class="form-control">
-          <option value="">All Statuses</option>
-          <option value="TODO">To Do</option>
-          <option value="IN_PROGRESS">In Progress</option>
-          <option value="DONE">Done</option>
+        <select
+          v-model="filters.status"
+          class="form-control"
+        >
+          <option value="">
+            All Statuses
+          </option>
+          <option value="TODO">
+            To Do
+          </option>
+          <option value="IN_PROGRESS">
+            In Progress
+          </option>
+          <option value="DONE">
+            Done
+          </option>
         </select>
 
-        <select v-model="filters.priority" class="form-control">
-          <option value="">All Priorities</option>
-          <option value="LOW">Low</option>
-          <option value="MEDIUM">Medium</option>
-          <option value="HIGH">High</option>
+        <select
+          v-model="filters.priority"
+          class="form-control"
+        >
+          <option value="">
+            All Priorities
+          </option>
+          <option value="LOW">
+            Low
+          </option>
+          <option value="MEDIUM">
+            Medium
+          </option>
+          <option value="HIGH">
+            High
+          </option>
         </select>
 
         <input
-          type="date"
           v-model="filters.dueDate"
+          type="date"
           class="form-control"
           placeholder="Filter by due date"
-        />
+        >
       </div>
     </div>
 
@@ -49,7 +71,10 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="task in filteredTasks" :key="task.id">
+          <tr
+            v-for="task in filteredTasks"
+            :key="task.id"
+          >
             <td>
               <span class="task-title">{{ task.title }}</span>
             </td>
@@ -79,15 +104,15 @@
               <div class="actions">
                 <button
                   class="btn-icon"
-                  @click="$emit('edit', task)"
                   title="Edit"
+                  @click="$emit('edit', task)"
                 >
                   ✏️
                 </button>
                 <button
                   class="btn-icon"
-                  @click="confirmDelete(task)"
                   title="Delete"
+                  @click="confirmDelete(task)"
                 >
                   🗑️
                 </button>
@@ -99,7 +124,10 @@
     </div>
 
     <!-- Delete Confirmation Dialog -->
-    <div v-if="showDeleteDialog" class="dialog-overlay">
+    <div
+      v-if="showDeleteDialog"
+      class="dialog-overlay"
+    >
       <div class="dialog">
         <h3>Confirm Delete</h3>
         <p>Are you sure you want to delete this task?</p>
@@ -112,8 +140,8 @@
           </button>
           <button
             class="btn btn-danger"
-            @click="deleteTask"
             :disabled="deleting"
+            @click="deleteTask"
           >
             {{ deleting ? 'Deleting...' : 'Delete' }}
           </button>

@@ -2,8 +2,14 @@
   <div class="login-page">
     <div class="login-card">
       <h1>Login</h1>
-      <form @submit.prevent="handleSubmit" class="login-form">
-        <div v-if="error" class="error-message">
+      <form
+        class="login-form"
+        @submit.prevent="handleSubmit"
+      >
+        <div
+          v-if="error"
+          class="error-message"
+        >
           {{ error }}
         </div>
         <div class="form-group">
@@ -14,7 +20,7 @@
             type="email"
             class="form-control"
             required
-          />
+          >
         </div>
 
         <div class="form-group">
@@ -25,11 +31,15 @@
             type="password"
             class="form-control"
             required
-          />
+          >
         </div>
 
         <div class="form-actions">
-          <button type="submit" class="btn btn-primary" :disabled="loading">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            :disabled="loading"
+          >
             {{ loading ? 'Logging in...' : 'Login' }}
           </button>
         </div>
@@ -37,7 +47,12 @@
         <div class="form-footer">
           <p>
             Don't have an account?
-            <router-link to="/register" class="link">Register</router-link>
+            <router-link
+              to="/register"
+              class="link"
+            >
+              Register
+            </router-link>
           </p>
         </div>
       </form>

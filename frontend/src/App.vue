@@ -2,23 +2,50 @@
   <div class="app">
     <nav class="navbar">
       <div class="navbar-brand">
-        <router-link to="/" class="logo">Task Management</router-link>
+        <router-link
+          to="/"
+          class="logo"
+        >
+          Task Management
+        </router-link>
       </div>
       <div class="navbar-menu">
         <template v-if="isAuthenticated">
-          <router-link to="/dashboard" class="nav-item">Dashboard</router-link>
-          <a @click="confirmLogout" class="nav-item logout-btn" :class="{ 'is-loading': authStore.loading }">Logout</a>
+          <router-link
+            to="/dashboard"
+            class="nav-item"
+          >
+            Dashboard
+          </router-link>
+          <a
+            class="nav-item logout-btn"
+            :class="{ 'is-loading': authStore.loading }"
+            @click="confirmLogout"
+          >Logout</a>
         </template>
         <template v-else>
-          <router-link to="/login" class="nav-item">Login</router-link>
-          <router-link to="/register" class="nav-item">Register</router-link>
+          <router-link
+            to="/login"
+            class="nav-item"
+          >
+            Login
+          </router-link>
+          <router-link
+            to="/register"
+            class="nav-item"
+          >
+            Register
+          </router-link>
         </template>
       </div>
     </nav>
 
     <main class="main-content">
       <router-view v-slot="{ Component }">
-        <transition name="fade" mode="out-in">
+        <transition
+          name="fade"
+          mode="out-in"
+        >
           <component :is="Component" />
         </transition>
       </router-view>

@@ -4,22 +4,22 @@ const routes = [
   {
     path: '/',
     name: 'home',
-    component: defineAsyncComponent(() => import('../views/Home.vue')),
+    component: defineAsyncComponent(() => import('../views/AppHome.vue')),
   },
   {
     path: '/login',
     name: 'login',
-    component: defineAsyncComponent(() => import('../views/Login.vue')),
+    component: defineAsyncComponent(() => import('../views/UserLogin.vue')),
   },
   {
     path: '/register',
     name: 'register',
-    component: defineAsyncComponent(() => import('../views/Register.vue')),
+    component: defineAsyncComponent(() => import('../views/UserRegister.vue')),
   },
   {
     path: '/dashboard',
     name: 'dashboard',
-    component: defineAsyncComponent(() => import('../views/Dashboard.vue')),
+    component: defineAsyncComponent(() => import('../views/AppDashboard.vue')),
     meta: { requiresAuth: true },
   },
   {

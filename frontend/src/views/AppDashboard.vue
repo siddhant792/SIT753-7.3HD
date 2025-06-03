@@ -60,7 +60,10 @@
           <div class="card-header">
             <div class="flex align-items-center justify-content-between">
               <span class="section-title">Recent Tasks</span>
-              <button class="btn-primary" @click="showNewTaskDialog">
+              <button
+                class="btn-primary"
+                @click="showNewTaskDialog"
+              >
                 <i class="icon-plus">+</i> New Task
               </button>
             </div>
@@ -76,15 +79,18 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="task in recentTasks" :key="task.id">
-                  <td><span class="font-bold">{{ task.title }}</span></td>
+                <tr
+                  v-for="recentTask in recentTasks"
+                  :key="recentTask.id"
+                >
+                  <td><span class="font-bold">{{ recentTask.title }}</span></td>
                   <td>
-                    <span :class="['status-badge', task.status.toLowerCase()]">
-                      {{ task.status }}
+                    <span :class="['status-badge', recentTask.status.toLowerCase()]">
+                      {{ recentTask.status }}
                     </span>
                   </td>
-                  <td>{{ task.assigned_to || 'Unassigned' }}</td>
-                  <td>{{ formatDate(task.created_at) }}</td>
+                  <td>{{ recentTask.assigned_to || 'Unassigned' }}</td>
+                  <td>{{ formatDate(recentTask.created_at) }}</td>
                 </tr>
               </tbody>
             </table>
@@ -94,23 +100,34 @@
     </div>
 
     <!-- New Task Dialog -->
-    <div v-if="taskDialog" class="modal-overlay">
+    <div
+      v-if="taskDialog"
+      class="modal-overlay"
+    >
       <div class="modal">
         <div class="modal-header">
           <h2>New Task</h2>
-          <button class="btn-close" @click="hideDialog">&times;</button>
+          <button
+            class="btn-close"
+            @click="hideDialog"
+          >
+            &times;
+          </button>
         </div>
         <div class="modal-content">
           <div class="field">
             <label for="title">Title</label>
             <input
-              type="text"
               id="title"
               v-model.trim="task.title"
+              type="text"
               required
               :class="{ 'invalid': submitted && !task.title }"
-            />
-            <small class="error" v-if="submitted && !task.title">Title is required.</small>
+            >
+            <small
+              v-if="submitted && !task.title"
+              class="error"
+            >Title is required.</small>
           </div>
 
           <div class="field">
@@ -119,7 +136,7 @@
               id="description"
               v-model="task.description"
               rows="3"
-            ></textarea>
+            />
           </div>
 
           <div class="field">
@@ -129,16 +146,34 @@
               v-model="task.status"
               required
             >
-              <option value="todo">To Do</option>
-              <option value="in_progress">In Progress</option>
-              <option value="review">Review</option>
-              <option value="done">Done</option>
+              <option value="todo">
+                To Do
+              </option>
+              <option value="in_progress">
+                In Progress
+              </option>
+              <option value="review">
+                Review
+              </option>
+              <option value="done">
+                Done
+              </option>
             </select>
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn-secondary" @click="hideDialog">Cancel</button>
-          <button class="btn-primary" @click="saveTask">Save</button>
+          <button
+            class="btn-secondary"
+            @click="hideDialog"
+          >
+            Cancel
+          </button>
+          <button
+            class="btn-primary"
+            @click="saveTask"
+          >
+            Save
+          </button>
         </div>
       </div>
     </div>
@@ -150,9 +185,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import { useRouter } from 'vue-router';
 
-const router = useRouter();
 const loading = ref(false);
 const taskDialog = ref(false);
 const task = ref({
@@ -212,9 +245,6 @@ const loadStats = async () => {
     };
   } catch (error) {
     console.error('Failed to load task statistics:', error);
-    if (error.response?.status === 401) {
-      
-    }
   }
 };
 
@@ -234,9 +264,6 @@ const loadRecentTasks = async () => {
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   } catch (error) {
     console.error('Failed to load recent tasks:', error);
-    if (error.response?.status === 401) {
-      
-    }
   } finally {
     loading.value = false;
   }

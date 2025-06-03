@@ -2,13 +2,26 @@
   <div class="settings-page">
     <div class="settings-card">
       <h1>Settings</h1>
-      <form @submit.prevent="handleSubmit" class="settings-form">
+      <form
+        class="settings-form"
+        @submit.prevent="handleSubmit"
+      >
         <div class="form-group">
           <label for="theme">Theme</label>
-          <select id="theme" v-model="form.theme" class="form-control">
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-            <option value="system">System</option>
+          <select
+            id="theme"
+            v-model="form.theme"
+            class="form-control"
+          >
+            <option value="light">
+              Light
+            </option>
+            <option value="dark">
+              Dark
+            </option>
+            <option value="system">
+              System
+            </option>
           </select>
         </div>
 
@@ -16,12 +29,15 @@
           <label for="notifications">Email Notifications</label>
           <div class="toggle-switch">
             <input
-              type="checkbox"
               id="notifications"
               v-model="form.emailNotifications"
+              type="checkbox"
               class="toggle-input"
+            >
+            <label
+              for="notifications"
+              class="toggle-label"
             />
-            <label for="notifications" class="toggle-label"></label>
           </div>
         </div>
 
@@ -34,11 +50,15 @@
             min="1"
             max="60"
             class="form-control"
-          />
+          >
         </div>
 
         <div class="form-actions">
-          <button type="submit" class="btn btn-primary" :disabled="loading">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            :disabled="loading"
+          >
             {{ loading ? 'Saving...' : 'Save Settings' }}
           </button>
         </div>

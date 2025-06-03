@@ -2,8 +2,14 @@
   <div class="register-page">
     <div class="register-card">
       <h1>Register</h1>
-      <form @submit.prevent="handleSubmit" class="register-form">
-        <div v-if="error" class="error-message">
+      <form
+        class="register-form"
+        @submit.prevent="handleSubmit"
+      >
+        <div
+          v-if="error"
+          class="error-message"
+        >
           {{ error }}
         </div>
         <div class="form-group">
@@ -14,7 +20,7 @@
             type="text"
             class="form-control"
             required
-          />
+          >
         </div>
 
         <div class="form-group">
@@ -25,7 +31,7 @@
             type="email"
             class="form-control"
             required
-          />
+          >
         </div>
 
         <div class="form-group">
@@ -36,7 +42,7 @@
             type="password"
             class="form-control"
             required
-          />
+          >
         </div>
 
         <div class="form-group">
@@ -47,11 +53,15 @@
             type="password"
             class="form-control"
             required
-          />
+          >
         </div>
 
         <div class="form-actions">
-          <button type="submit" class="btn btn-primary" :disabled="loading">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            :disabled="loading"
+          >
             {{ loading ? 'Registering...' : 'Register' }}
           </button>
         </div>
@@ -59,18 +69,31 @@
         <div class="form-footer">
           <p>
             Already have an account?
-            <router-link to="/login" class="link">Login</router-link>
+            <router-link
+              to="/login"
+              class="link"
+            >
+              Login
+            </router-link>
           </p>
         </div>
       </form>
     </div>
 
     <!-- Success Modal -->
-    <div v-if="showSuccessModal" class="modal-overlay">
+    <div
+      v-if="showSuccessModal"
+      class="modal-overlay"
+    >
       <div class="modal-content">
         <h2>Registration Successful!</h2>
         <p>You have been registered. Please login to continue.</p>
-        <button @click="goToLogin" class="btn btn-primary">Go to Login</button>
+        <button
+          class="btn btn-primary"
+          @click="goToLogin"
+        >
+          Go to Login
+        </button>
       </div>
     </div>
   </div>

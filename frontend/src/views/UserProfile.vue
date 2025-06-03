@@ -2,7 +2,10 @@
   <div class="profile-page">
     <div class="profile-card">
       <h1>Profile</h1>
-      <form @submit.prevent="handleSubmit" class="profile-form">
+      <form
+        class="profile-form"
+        @submit.prevent="handleSubmit"
+      >
         <div class="form-group">
           <label for="name">Full Name</label>
           <input
@@ -11,7 +14,7 @@
             type="text"
             class="form-control"
             required
-          />
+          >
         </div>
 
         <div class="form-group">
@@ -22,7 +25,7 @@
             type="email"
             class="form-control"
             required
-          />
+          >
         </div>
 
         <div class="form-group">
@@ -32,7 +35,7 @@
             v-model="form.currentPassword"
             type="password"
             class="form-control"
-          />
+          >
         </div>
 
         <div class="form-group">
@@ -42,7 +45,7 @@
             v-model="form.newPassword"
             type="password"
             class="form-control"
-          />
+          >
         </div>
 
         <div class="form-group">
@@ -52,11 +55,15 @@
             v-model="form.confirmPassword"
             type="password"
             class="form-control"
-          />
+          >
         </div>
 
         <div class="form-actions">
-          <button type="submit" class="btn btn-primary" :disabled="loading">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            :disabled="loading"
+          >
             {{ loading ? 'Saving...' : 'Save Changes' }}
           </button>
         </div>

@@ -1,10 +1,20 @@
 <template>
   <div class="layout-wrapper">
     <!-- Top Navigation -->
-    <Menubar :model="menuItems" class="layout-menubar">
+    <Menubar
+      :model="menuItems"
+      class="layout-menubar"
+    >
       <template #start>
-        <router-link to="/" class="logo">
-          <img src="@/assets/logo.png" alt="Logo" height="40" />
+        <router-link
+          to="/"
+          class="logo"
+        >
+          <img
+            src="@/assets/logo.png"
+            alt="Logo"
+            height="40"
+          >
           <span class="logo-text">Task Manager</span>
         </router-link>
       </template>
@@ -14,18 +24,22 @@
           <Button
             icon="pi pi-bell"
             class="p-button-rounded p-button-text"
-            @click="toggleNotifications"
             :badge="unreadNotifications"
-            badgeClass="p-badge-danger"
+            badge-class="p-badge-danger"
+            @click="toggleNotifications"
           />
 
-          <Menu ref="userMenu" :model="userMenuItems" :popup="true" />
+          <Menu
+            ref="userMenu"
+            :model="userMenuItems"
+            :popup="true"
+          />
           <Button
             icon="pi pi-user"
             class="p-button-rounded p-button-text"
-            @click="toggleUserMenu"
             aria-haspopup="true"
             aria-controls="user-menu"
+            @click="toggleUserMenu"
           />
         </div>
       </template>
@@ -33,14 +47,14 @@
 
     <!-- Main Content -->
     <div class="layout-main">
-      <router-view></router-view>
+      <router-view />
     </div>
 
     <!-- Notifications Panel -->
     <Sidebar
       v-model="showNotifications"
       position="right"
-      :baseZIndex="1000"
+      :base-z-index="1000"
       class="notifications-panel"
     >
       <template #header>
@@ -63,14 +77,17 @@
           :class="{ unread: !notification.read }"
           @click="markAsRead(notification.id)"
         >
-          <i :class="['notification-icon', notification.icon]"></i>
+          <i :class="['notification-icon', notification.icon]" />
           <div class="notification-content">
             <span class="notification-text">{{ notification.text }}</span>
             <small class="notification-time">{{ formatDate(notification.time) }}</small>
           </div>
         </div>
 
-        <div v-if="notifications.length === 0" class="text-center p-4">
+        <div
+          v-if="notifications.length === 0"
+          class="text-center p-4"
+        >
           No notifications
         </div>
       </div>
@@ -84,7 +101,10 @@
       :modal="true"
     >
       <div class="confirmation-content">
-        <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
+        <i
+          class="pi pi-exclamation-triangle mr-3"
+          style="font-size: 2rem"
+        />
         <span>Are you sure you want to logout?</span>
       </div>
       <template #footer>

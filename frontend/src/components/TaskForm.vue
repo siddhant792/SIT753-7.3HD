@@ -1,5 +1,8 @@
 <template>
-  <form @submit.prevent="handleSubmit" class="task-form">
+  <form
+    class="task-form"
+    @submit.prevent="handleSubmit"
+  >
     <div class="form-group">
       <label for="title">Title</label>
       <input
@@ -8,7 +11,7 @@
         type="text"
         class="form-control"
         required
-      />
+      >
     </div>
 
     <div class="form-group">
@@ -18,7 +21,7 @@
         v-model="form.description"
         class="form-control"
         rows="4"
-      ></textarea>
+      />
     </div>
 
     <div class="form-group">
@@ -29,9 +32,15 @@
         class="form-control"
         required
       >
-        <option value="TODO">To Do</option>
-        <option value="IN_PROGRESS">In Progress</option>
-        <option value="DONE">Done</option>
+        <option value="TODO">
+          To Do
+        </option>
+        <option value="IN_PROGRESS">
+          In Progress
+        </option>
+        <option value="DONE">
+          Done
+        </option>
       </select>
     </div>
 
@@ -43,9 +52,15 @@
         class="form-control"
         required
       >
-        <option value="LOW">Low</option>
-        <option value="MEDIUM">Medium</option>
-        <option value="HIGH">High</option>
+        <option value="LOW">
+          Low
+        </option>
+        <option value="MEDIUM">
+          Medium
+        </option>
+        <option value="HIGH">
+          High
+        </option>
       </select>
     </div>
 
@@ -56,7 +71,7 @@
         v-model="form.dueDate"
         type="date"
         class="form-control"
-      />
+      >
     </div>
 
     <div class="form-group">
@@ -67,9 +82,9 @@
           v-model="newTag"
           type="text"
           class="form-control"
-          @keydown.enter.prevent="addTag"
           placeholder="Type and press Enter to add tags"
-        />
+          @keydown.enter.prevent="addTag"
+        >
         <div class="tags-list">
           <span
             v-for="(tag, index) in form.tags"
@@ -88,10 +103,18 @@
     </div>
 
     <div class="form-actions">
-      <button type="button" class="btn btn-secondary" @click="$emit('cancel')">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        @click="$emit('cancel')"
+      >
         Cancel
       </button>
-      <button type="submit" class="btn btn-primary" :disabled="loading">
+      <button
+        type="submit"
+        class="btn btn-primary"
+        :disabled="loading"
+      >
         {{ loading ? 'Saving...' : 'Save Task' }}
       </button>
     </div>

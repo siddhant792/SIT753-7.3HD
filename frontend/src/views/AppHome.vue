@@ -2,12 +2,20 @@
   <div class="home">
     <div class="hero">
       <h1>Task Management Platform</h1>
-      <p class="subtitle">Streamline your workflow with our powerful task management solution</p>
+      <p class="subtitle">
+        Streamline your workflow with our powerful task management solution
+      </p>
       <div class="cta-buttons">
-        <router-link to="/register" class="p-button p-button-primary">
+        <router-link
+          to="/register"
+          class="p-button p-button-primary"
+        >
           Get Started
         </router-link>
-        <router-link to="/login" class="p-button p-button-secondary">
+        <router-link
+          to="/login"
+          class="p-button p-button-secondary"
+        >
           Login
         </router-link>
       </div>
@@ -15,25 +23,25 @@
 
     <div class="features">
       <div class="feature-card">
-        <i class="pi pi-list feature-icon"></i>
+        <i class="pi pi-list feature-icon" />
         <h3>Task Management</h3>
         <p>Create, assign, and track tasks with ease</p>
       </div>
 
       <div class="feature-card">
-        <i class="pi pi-users feature-icon"></i>
+        <i class="pi pi-users feature-icon" />
         <h3>Team Collaboration</h3>
         <p>Work together seamlessly with your team</p>
       </div>
 
       <div class="feature-card">
-        <i class="pi pi-chart-line feature-icon"></i>
+        <i class="pi pi-chart-line feature-icon" />
         <h3>Analytics</h3>
         <p>Track progress and performance metrics</p>
       </div>
 
       <div class="feature-card">
-        <i class="pi pi-bell feature-icon"></i>
+        <i class="pi pi-bell feature-icon" />
         <h3>Real-time Updates</h3>
         <p>Stay informed with instant notifications</p>
       </div>
@@ -44,41 +52,56 @@
       <div class="pricing-cards">
         <div class="pricing-card">
           <h3>Free</h3>
-          <div class="price">$0</div>
+          <div class="price">
+            $0
+          </div>
           <ul>
             <li>Up to 5 users</li>
             <li>Basic task management</li>
             <li>Email support</li>
           </ul>
-          <router-link to="/register" class="p-button p-button-outlined">
+          <router-link
+            to="/register"
+            class="p-button p-button-outlined"
+          >
             Start Free
           </router-link>
         </div>
 
         <div class="pricing-card featured">
           <h3>Pro</h3>
-          <div class="price">$10<span>/month</span></div>
+          <div class="price">
+            $10<span>/month</span>
+          </div>
           <ul>
             <li>Up to 20 users</li>
             <li>Advanced task management</li>
             <li>Priority support</li>
             <li>Analytics dashboard</li>
           </ul>
-          <router-link to="/register" class="p-button p-button-primary">
+          <router-link
+            to="/register"
+            class="p-button p-button-primary"
+          >
             Get Pro
           </router-link>
         </div>
 
         <div class="pricing-card">
           <h3>Enterprise</h3>
-          <div class="price">Custom</div>
+          <div class="price">
+            Custom
+          </div>
           <ul>
             <li>Unlimited users</li>
             <li>Custom features</li>
             <li>24/7 support</li>
             <li>Dedicated account manager</li>
           </ul>
-          <router-link to="/register" class="p-button p-button-outlined">
+          <router-link
+            to="/register"
+            class="p-button p-button-outlined"
+          >
             Contact Sales
           </router-link>
         </div>
