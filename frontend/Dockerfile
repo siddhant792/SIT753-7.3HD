@@ -15,6 +15,7 @@ COPY . .
 ENV NODE_ENV=production
 ENV VITE_API_URL=http://localhost:3001
 ENV VITE_WS_URL=ws://localhost:3001
+ENV VITE_BASE_URL=http://localhost:3001
 
 # Build the application
 RUN npm run build

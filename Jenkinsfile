@@ -137,6 +137,7 @@ pipeline {
                                 --link backend \
                                 -e VITE_API_URL=http://localhost:3001 \
                                 -e VITE_WS_URL=ws://localhost:3001 \
+                                -e VITE_BASE_URL=http://localhost:3001 \
                                 -p 8081:80 \
                                 ${APP_NAME}-frontend:${VERSION}
                         '''
