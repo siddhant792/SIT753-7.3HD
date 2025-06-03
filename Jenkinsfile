@@ -48,10 +48,13 @@ pipeline {
                                 export PATH=$PATH:/usr/local/bin:/opt/homebrew/bin
                                 echo "Building frontend application..."
                                 
-                                # Install dependencies
-                                npm ci
+                                # Clean install dependencies and update package-lock.json
+                                echo "Installing dependencies..."
+                                rm -rf node_modules package-lock.json
+                                npm install
                                 
                                 # Build Vue application
+                                echo "Building Vue application..."
                                 npm run build
                                 
                                 # Verify build output
