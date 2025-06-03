@@ -127,13 +127,10 @@ pipeline {
 
     post {
         always {
-            node {
-                // Clean up workspace
-                cleanWs()
-                
-                // Archive all reports
-                archiveArtifacts artifacts: '**/*.json,**/*.html,**/coverage/**,**/test-results/**,version.txt', allowEmptyArchive: true
-            }
+            // Clean up workspace
+            cleanWs()
+            // Archive all reports
+            archiveArtifacts artifacts: '**/*.json,**/*.html,**/coverage/**,**/test-results/**,version.txt', allowEmptyArchive: true
         }
     }
 } 
