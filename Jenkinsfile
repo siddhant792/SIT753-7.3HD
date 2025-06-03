@@ -210,6 +210,45 @@ pipeline {
                 }
             }
         }
+
+        stage('Security') {
+            steps {
+                script {
+                    // Run npm audit for both frontend and backend
+                    dir('frontend') {
+                        try {
+                            sh '''
+                                export PATH=$PATH:/opt/homebrew/bin
+                                echo "Running security audit for frontend..."
+                                npm audit
+                            '''
+                        } catch (Exception e) {
+                            echo "Frontend security check failed: ${e.message}"
+                            currentBuild.result = 'UNSTABLE'
+                        }
+                    }
+                    
+                    dir('backend') {
+                        try {
+                            sh '''
+                                export PATH=$PATH:/opt/homebrew/bin
+                                echo "Running security audit for backend..."
+                                npm audit
+                            '''
+                        } catch (Exception e) {
+                            echo "Backend security check failed: ${e.message}"
+                            currentBuild.result = 'UNSTABLE'
+                        }
+                    }
+                }
+            }
+            post {
+                always {
+                    // Archive security reports
+                    archiveArtifacts artifacts: '**/npm-audit-*.json', allowEmptyArchive: true
+                }
+            }
+        }
     }
 
     post {
