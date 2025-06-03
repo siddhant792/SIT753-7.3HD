@@ -97,10 +97,15 @@ pipeline {
                         sh '''
                             export PATH=$PATH:/usr/local/bin:/opt/homebrew/bin
                             
+                            # Create a custom network
+                            echo "Creating custom network..."
+                            /usr/local/bin/docker network create hd-network || true
+                            
                             # Start PostgreSQL
                             echo "Starting PostgreSQL..."
                             /usr/local/bin/docker run -d \
                                 --name postgres \
+                                --network hd-network \
                                 -e POSTGRES_DB=task_management \
                                 -e POSTGRES_USER=postgres \
                                 -e POSTGRES_PASSWORD=postgres \
@@ -115,7 +120,7 @@ pipeline {
                             echo "Starting Backend..."
                             /usr/local/bin/docker run -d \
                                 --name backend \
-                                --link postgres \
+                                --network hd-network \
                                 -e NODE_ENV=development \
                                 -e PORT=3001 \
                                 -e DATABASE_URL=postgres://postgres:postgres@postgres:5432/task_management \
@@ -136,7 +141,7 @@ pipeline {
                             echo "Starting Frontend..."
                             /usr/local/bin/docker run -d \
                                 --name frontend \
-                                --network container:backend \
+                                --network hd-network \
                                 -e VITE_API_URL=http://localhost:3001 \
                                 -e VITE_WS_URL=ws://localhost:3001 \
                                 -e VITE_BASE_URL=http://localhost:3001 \
