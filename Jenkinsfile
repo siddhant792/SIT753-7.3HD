@@ -91,6 +91,11 @@ pipeline {
                             currentBuild.result = 'UNSTABLE'
                         }
                     }
+
+                    // Run frontend coverage tests
+                    dir('frontend') {
+                        sh 'npm run test:coverage'
+                    }
                 }
             }
             post {
