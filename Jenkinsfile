@@ -45,15 +45,24 @@ pipeline {
                 script {
                     // Run unit tests
                     dir('backend') {
-                        sh 'npm run test:unit'
+                        sh '''
+                            export PATH=$PATH:/opt/homebrew/bin
+                            npm run test:unit
+                        '''
                     }
                     dir('frontend') {
-                        sh 'npm run test:unit'
+                        sh '''
+                            export PATH=$PATH:/opt/homebrew/bin
+                            npm run test:unit
+                        '''
                     }
                     
                     // Run integration tests
                     dir('backend') {
-                        sh 'npm run test:integration'
+                        sh '''
+                            export PATH=$PATH:/opt/homebrew/bin
+                            npm run test:integration
+                        '''
                     }
                 }
             }
@@ -78,20 +87,32 @@ pipeline {
                 script {
                     // Run ESLint for frontend
                     dir('frontend') {
-                        sh 'npm run lint'
+                        sh '''
+                            export PATH=$PATH:/opt/homebrew/bin
+                            npm run lint
+                        '''
                     }
                     
                     // Run ESLint for backend
                     dir('backend') {
-                        sh 'npm run lint'
+                        sh '''
+                            export PATH=$PATH:/opt/homebrew/bin
+                            npm run lint
+                        '''
                     }
                     
                     // Generate code coverage reports
                     dir('frontend') {
-                        sh 'npm run test:coverage'
+                        sh '''
+                            export PATH=$PATH:/opt/homebrew/bin
+                            npm run test:coverage
+                        '''
                     }
                     dir('backend') {
-                        sh 'npm run test:coverage'
+                        sh '''
+                            export PATH=$PATH:/opt/homebrew/bin
+                            npm run test:coverage
+                        '''
                     }
                 }
             }
@@ -115,10 +136,16 @@ pipeline {
                 script {
                     // Run npm audit for both frontend and backend
                     dir('frontend') {
-                        sh 'npm audit --json > npm-audit-frontend.json'
+                        sh '''
+                            export PATH=$PATH:/opt/homebrew/bin
+                            npm audit --json > npm-audit-frontend.json
+                        '''
                     }
                     dir('backend') {
-                        sh 'npm audit --json > npm-audit-backend.json'
+                        sh '''
+                            export PATH=$PATH:/opt/homebrew/bin
+                            npm audit --json > npm-audit-backend.json
+                        '''
                     }
                 }
             }
