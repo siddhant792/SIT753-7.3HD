@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="1" failures="0" errors="0" time="0.559">
-  <testsuite name="Integration Tests" errors="0" failures="0" skipped="0" timestamp="2025-06-03T12:06:53" time="0.549" tests="1">
-    <testcase classname="Integration Tests should respond to health check" name="Integration Tests should respond to health check" time="0.013">
+<testsuites name="jest tests" tests="1" failures="0" errors="0" time="0.71">
+  <testsuite name="Integration Tests" errors="0" failures="0" skipped="0" timestamp="2025-06-03T12:08:41" time="0.687" tests="1">
+    <testcase classname="Integration Tests should respond to health check" name="Integration Tests should respond to health check" time="0.012">
     </testcase>
   </testsuite>
 </testsuites>

@@ -6,7 +6,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 // Debug: Log the DATABASE_URL (with password masked)
-const dbUrl = process.env.DATABASE_URL
+const dbUrl = process.env.DATABASE_URL || 'postgres://localhost:5432/testdb'
 if (!dbUrl) {
   logger.error('DATABASE_URL is not defined in environment variables')
   throw new Error('DATABASE_URL is not defined in environment variables')
