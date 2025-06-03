@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="1" failures="0" errors="0" time="0.687">
+  <testsuite name="Integration Tests" errors="0" failures="0" skipped="0" timestamp="2025-06-03T03:55:19" time="0.589" tests="1">
+    <testcase classname="Integration Tests should respond to health check" name="Integration Tests should respond to health check" time="0.013">
+    </testcase>
+  </testsuite>
+</testsuites>

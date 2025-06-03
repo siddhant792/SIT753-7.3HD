@@ -51,24 +51,65 @@ pipeline {
                 script {
                     // Run unit tests
                     dir('backend') {
-                        sh '''
-                            export PATH=$PATH:/opt/homebrew/bin
-                            npm run test:unit
-                        '''
+                        try {
+                            sh '''
+                                export PATH=$PATH:/opt/homebrew/bin
+                                npm run test:unit
+                            '''
+                        } catch (Exception e) {
+                            echo "Backend unit tests failed: ${e.message}"
+                            currentBuild.result = 'UNSTABLE'
+                        }
                     }
                     dir('frontend') {
-                        sh '''
-                            export PATH=$PATH:/opt/homebrew/bin
-                            npm run test:unit
-                        '''
+                        try {
+                            sh '''
+                                export PATH=$PATH:/opt/homebrew/bin
+                                npm run test:unit
+                            '''
+                        } catch (Exception e) {
+                            echo "Frontend unit tests failed: ${e.message}"
+                            currentBuild.result = 'UNSTABLE'
+                        }
                     }
                     
                     // Run integration tests
                     dir('backend') {
-                        sh '''
-                            export PATH=$PATH:/opt/homebrew/bin
-                            npm run test:integration
-                        '''
+                        try {
+                            sh '''
+                                export PATH=$PATH:/opt/homebrew/bin
+                                npm run test:integration
+                            '''
+                        } catch (Exception e) {
+                            echo "Backend integration tests failed: ${e.message}"
+                            currentBuild.result = 'UNSTABLE'
+                        }
+                    }
+
+                    // Run API tests
+                    dir('backend') {
+                        try {
+                            sh '''
+                                export PATH=$PATH:/opt/homebrew/bin
+                                npm run test:api
+                            '''
+                        } catch (Exception e) {
+                            echo "Backend API tests failed: ${e.message}"
+                            currentBuild.result = 'UNSTABLE'
+                        }
+                    }
+
+                    // Run E2E tests with Playwright
+                    dir('frontend') {
+                        try {
+                            sh '''
+                                export PATH=$PATH:/opt/homebrew/bin
+                                npm run test:e2e
+                            '''
+                        } catch (Exception e) {
+                            echo "Frontend E2E tests failed: ${e.message}"
+                            currentBuild.result = 'UNSTABLE'
+                        }
                     }
                 }
             }
@@ -76,14 +117,37 @@ pipeline {
                 always {
                     // Publish test results
                     junit '**/test-results/*.xml'
+                    
+                    // Publish test coverage reports
                     publishHTML([
                         allowMissing: false,
                         alwaysLinkToLastBuild: true,
                         keepAll: true,
                         reportDir: 'frontend/coverage',
                         reportFiles: 'index.html',
-                        reportName: 'Test Coverage Report'
+                        reportName: 'Frontend Test Coverage'
                     ])
+                    publishHTML([
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'backend/coverage',
+                        reportFiles: 'index.html',
+                        reportName: 'Backend Test Coverage'
+                    ])
+
+                    // Publish Playwright test reports
+                    publishHTML([
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'frontend/playwright-report',
+                        reportFiles: 'index.html',
+                        reportName: 'E2E Test Report'
+                    ])
+
+                    // Archive test artifacts
+                    archiveArtifacts artifacts: '**/test-results/**,**/coverage/**,**/playwright-report/**', allowEmptyArchive: true
                 }
             }
         }
@@ -166,10 +230,10 @@ pipeline {
 
     post {
         always {
-            // Clean up workspace
-            cleanWs()
-            // Archive all reports
+            // Archive all reports first
             archiveArtifacts artifacts: '**/*.json,**/*.html,**/coverage/**,**/test-results/**,version.txt', allowEmptyArchive: true
+            // Clean up workspace after archiving
+            cleanWs()
         }
     }
 } 

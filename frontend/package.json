@@ -7,7 +7,10 @@
     "test:unit": "jest --coverage",
     "test:coverage": "jest --coverage --coverageReporters='text-summary' --coverageReporters='html'",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "start": "webpack serve --mode development"
+    "start": "webpack serve --mode development",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug"
   },
   "dependencies": {
     "react": "^18.2.0",
@@ -19,6 +22,7 @@
     "@babel/preset-env": "^7.23.7",
     "@babel/preset-react": "^7.23.7",
     "@babel/preset-typescript": "^7.23.7",
+    "@playwright/test": "^1.52.0",
     "@testing-library/jest-dom": "^6.4.2",
     "@testing-library/react": "^14.2.1",
     "@types/jest": "^29.5.12",
@@ -40,4 +44,4 @@
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^4.15.1"
   }
-} 
+}

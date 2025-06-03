@@ -1,10 +1,13 @@
 import request from 'supertest';
-import { app } from './index';
+import app from './index';
 
-describe('API Integration Tests', () => {
-  it('should return welcome message', async () => {
-    const response = await request(app).get('/');
-    expect(response.status).toBe(200);
-    expect(response.text).toBe('Welcome to HD Project API');
+describe('Integration Tests', () => {
+  test('should respond to health check', async () => {
+    const response = await request(app)
+      .get('/health')
+      .expect('Content-Type', /json/)
+      .expect(200);
+
+    expect(response.body.status).toBe('ok');
   });
 }); 
