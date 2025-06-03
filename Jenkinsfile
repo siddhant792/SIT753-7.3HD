@@ -51,6 +51,76 @@ pipeline {
                 }
             }
         }
+
+        stage('Test') {
+            steps {
+                script {
+                    // Run unit tests
+                    dir('backend') {
+                        try {
+                            sh '''
+                                export PATH=$PATH:/opt/homebrew/bin
+                                npm run test:unit
+                            '''
+                        } catch (Exception e) {
+                            echo "Backend unit tests failed: ${e.message}"
+                            currentBuild.result = 'UNSTABLE'
+                        }
+                    }
+                    dir('frontend') {
+                        try {
+                            sh '''
+                                export PATH=$PATH:/opt/homebrew/bin
+                                npm run test:unit
+                            '''
+                        } catch (Exception e) {
+                            echo "Frontend unit tests failed: ${e.message}"
+                            currentBuild.result = 'UNSTABLE'
+                        }
+                    }
+                    
+                    // Run integration tests
+                    dir('backend') {
+                        try {
+                            sh '''
+                                export PATH=$PATH:/opt/homebrew/bin
+                                npm run test:integration
+                            '''
+                        } catch (Exception e) {
+                            echo "Backend integration tests failed: ${e.message}"
+                            currentBuild.result = 'UNSTABLE'
+                        }
+                    }
+                }
+            }
+            post {
+                always {
+                    // Publish test results
+                    junit '**/test-results/*.xml'
+                    
+                    // Publish test coverage reports
+                    publishHTML([
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'frontend/coverage',
+                        reportFiles: 'index.html',
+                        reportName: 'Frontend Test Coverage'
+                    ])
+                    publishHTML([
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'backend/coverage',
+                        reportFiles: 'index.html',
+                        reportName: 'Backend Test Coverage'
+                    ])
+
+                    // Archive test artifacts
+                    archiveArtifacts artifacts: '**/test-results/**,**/coverage/**', allowEmptyArchive: true
+                }
+            }
+        }
     }
 
     post {
