@@ -131,7 +131,7 @@ pipeline {
                     withSonarQubeEnv('SonarQube') {
                         sh """
                             sonar-scanner \
-                                -Dsonar.projectKey=${APP_NAME} \
+                                -Dsonar.projectKey=\${APP_NAME} \
                                 -Dsonar.sources=. \
                                 -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/coverage/** \
                                 -Dsonar.javascript.lcov.reportPaths=**/coverage/lcov.info \
